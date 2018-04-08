@@ -30,6 +30,8 @@ contract CaleroICO is Ownable {
 
     event SoftcapReached();
     event HardcapReached();
+
+    event CrowdStarted(uint256 tokens, uint256 startDate, uint256 endDate, uint256 bonus);
     
     event RefundsEnabled();
     event Refunded(address indexed beneficiary, uint256 weiAmount);
@@ -40,7 +42,6 @@ contract CaleroICO is Ownable {
     struct Contributor {
         uint256 eth;                // ETH on this wallet 
         bool whitelisted;           // White listed true/false
-        bool created;               // Is contributor added
         uint256 ethHistory;         // All deposited ETH history
         uint256 tokensPurchasedDuringICO;  // Tokens puchuased during ICO
         uint256 bonusGetDuringPrivateSale;  // Bonus purchuased during private sale
@@ -50,7 +51,7 @@ contract CaleroICO is Ownable {
         uint256 tokens;    // Tokens in crowdsale
         uint256 startDate; // Date when crowsale will be starting, after its starting that property will be the 0
         uint256 endDate;   // Date when crowdsale will be stop
-        uint256 discount;  // Discount
+        uint256 bonus;  // Bonus
     }
 
     Ico public ICO;
@@ -79,15 +80,16 @@ contract CaleroICO is Ownable {
         require(ICO.endDate > now);
         require(ICO.tokens != 0);
 
-        secureChecks(msg.sender);
+        _secureChecks(msg.sender);
     }
 
     /**
      * @dev token purchase
      * @param _contributor Address performing the token purchase
      */
-    function secureChecks(address _contributor) internal {
+    function _secureChecks(address _contributor) internal {
         require(_contributor != address(0));
+        require(contributors[msg.sender].whitelisted);
         require(msg.value != 0);
         require(msg.value >= ( 1 ether / 100));
 
@@ -100,13 +102,7 @@ contract CaleroICO is Ownable {
         contributor.eth = contributor.eth.add(msg.value);
         contributor.ethHistory = contributor.ethHistory.add(msg.value);
 
-        if (contributor.created == false) {
-            contributor.created = true;
-        }
-
-        if (contributor.whitelisted) {
-            _deliverTokens(msg.sender);
-        }
+        _deliverTokens(msg.sender);
     }
 
     function _deliverTokens(address _contributor) internal {
@@ -116,13 +112,13 @@ contract CaleroICO is Ownable {
         uint256 amountToken = _getTokenAmount(amountEth);
 
         if (1 == stage) {         
-            contributor.bonusGetDuringPrivateSale = (contributor.bonusGetDuringPrivateSale).add(_withDiscount(amountEth * 1 ether, ICO.discount));
+            contributor.bonusGetDuringPrivateSale = (contributor.bonusGetDuringPrivateSale).add( _withBonus(((amountEth * 1 ether).div(buyPrice)), ICO.bonus ));
             // Bonus tokens (for private sale buyers) will lock 2 more months after crowdsale finish
         }
 
-        require(confirmSell(amountToken));
         require(amountToken > 0);
-
+        require(_confirmSell(amountToken));
+        
         contributor.eth = 0;
         contributor.tokensPurchasedDuringICO = (contributor.tokensPurchasedDuringICO).add(amountToken);
         
@@ -144,7 +140,7 @@ contract CaleroICO is Ownable {
 
     }
 
-    function confirmSell(uint256 _amount) internal view returns(bool) {
+    function _confirmSell(uint256 _amount) internal view returns(bool) {
         if (ICO.tokens < _amount) {
             return false;
         }
@@ -152,7 +148,226 @@ contract CaleroICO is Ownable {
         return true;
     }
 
-    function crowdSaleStatus() public constant returns (string) {
+    /**
+     * @dev the way in which ether is converted to tokens.
+     * @param _weiAmount Value in wei to be converted into tokens
+     * @return Number of tokens that can be purchased with the specified _weiAmount
+     */
+    function _getTokenAmount(uint256 _weiAmount) internal view returns(uint256) {
+        require(_weiAmount > 0);
+        
+        uint256 weiAmount = (_weiAmount * 1 ether).div(buyPrice);
+        require(weiAmount > 0);
+        
+        weiAmount = weiAmount.add(_withBonus(weiAmount, ICO.bonus));
+        return weiAmount;
+    }
+
+    function _withBonus(uint256 _amount, uint256 _percent) internal pure returns(uint256) {
+        require(_amount > 0);
+
+        return (_amount.mul(_percent)).div(100);
+    }
+
+    function _whitelistAddress(address _contributor) internal {
+        require(_contributor != address(0));
+        
+        Contributor storage contributor = contributors[_contributor];
+        contributor.whitelisted = true;
+    }
+
+    
+    /************ Public functions for owner only ************/
+
+    /**
+     * @dev Start crowdsale state
+     */
+    function startCrowd(uint256 _tokens, uint256 _startDate, uint256 _endDate, uint256 _bonus) public onlyOwner {
+        require(_tokens <= availableTokens);
+        require(_startDate < _endDate);
+
+        ICO = Ico(_tokens, _startDate, _endDate, _bonus); // _startDate + _endDate * 1 days
+        stage = stage.add(1);
+
+        CrowdStarted(_tokens, _startDate, _endDate, _bonus);
+    }
+
+    /**
+     * @dev Change crowdsale bonus size
+     */
+    function changeBonus(uint256 _bonus) public onlyOwner returns(bool) {
+        ICO = Ico (ICO.tokens, ICO.startDate, ICO.endDate, _bonus);
+        return true;
+    }
+
+    /**
+     * @dev Increase crowdsale tokens size
+     */
+    function increaseIcoStageTokensSize(uint256 _tokens) public onlyOwner returns(bool) {
+        require(_tokens > 0);
+         
+        ICO = Ico ((ICO.tokens).add(_tokens), ICO.startDate, ICO.endDate, ICO.bonus);
+        return true;
+    }
+
+    /**
+     * @dev Decrease crowdsale bonus size
+     */
+    function decreaseIcoStageTokensSize(uint256 _tokens) public onlyOwner returns(bool) {
+        require(_tokens > 0);
+         
+        ICO = Ico ((ICO.tokens).sub(_tokens), ICO.startDate, ICO.endDate, ICO.bonus);
+        return true;
+    }
+
+    /**
+     * @dev Change token buy size
+     */ 
+    function changeTokenBuyPrice(uint256 _numerator, uint256 _denominator) public onlyOwner returns(bool) {
+        require(_numerator != 0);
+        require(_denominator != 0);
+    
+        if (_numerator == 0) _numerator = 1;
+        if (_denominator == 0) _denominator = 1;
+
+        buyPrice = (_numerator * 1 ether).div(_denominator);
+
+        return true;
+    }
+ 
+    /**
+     * @dev Send tokens to contributor
+     */
+    function sendToken(address _address, uint256 _amountTokens) public onlyOwner returns(bool){
+        require(_address != 0x0);
+        require(_amountTokens != 0);
+
+        require(token.transfer(_address, _amountTokens));
+
+        return true;
+    }
+
+    /**
+     * @dev Send tokens to many contributors
+     */
+    function sendTokens(address[] _addresses, uint256[] _amountTokens) public onlyOwner returns(bool) {
+        require(_addresses.length > 0);
+        require(_amountTokens.length > 0);
+        require(_addresses.length  == _amountTokens.length);
+
+        for (uint256 i = 0; i < _addresses.length; i++) {
+            sendToken(_addresses[i], _amountTokens[i]);
+        }
+
+        return true;
+    }
+
+    /**
+     * @dev Add contributor to whitelist
+     */
+    function whitelistAddress(address _contributor) public onlyOwner {
+        _whitelistAddress(_contributor);
+    }
+
+    /**
+     * @dev Add many contributors to whitelist
+     */
+    function whitelistAddresses(address[] _contributors) public onlyOwner {
+        for (uint256 i = 0; i < _contributors.length; i++) {
+            _whitelistAddress(_contributors[i]);
+        }
+    }
+
+    /**
+     * @dev Transfer ETH from smart contract if soft cap was reached
+     */
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner {
+        require(softcapReached);
+        
+        _to.transfer(amount);
+    }
+
+
+
+    /************ Public functions for contributors ************/
+    
+    /**
+     * @dev Burn smart contract available tokens after ICO
+     */
+    function burnAfterICO() public afterDeadline {
+        require(!burned);
+        require(!hardcapReached);
+
+        token.burn(availableTokens);
+        burned = true;
+
+        Burned(availableTokens);
+    }
+
+    /**
+     * @dev Returnstokens according to rate
+     */
+    function getTokenAmount(uint256 _weiAmount) public view returns(uint256) {
+        return _getTokenAmount(_weiAmount);
+    }
+    
+    /**
+     * @dev Returnsavaialble tokens for current stage
+     */
+    function getPhaseAvailableTokens() public view returns(uint256) {
+        return ICO.tokens;
+    }
+    
+    /**
+     * @dev Returnsavailable tokens for current phase for sale
+     */
+    function getPhaseBuyableTokens() public view returns(uint256) {
+        uint256 tokensForBuy = (ICO.tokens).div(ICO.bonus + 100);
+        return tokensForBuy;
+    }
+
+    /**
+     * @dev Enable refund if softcap doesnt reached
+     */
+    function enableRefundAfterICO() public afterDeadline {
+        require(!softcapReached);
+
+        refundIsAvailable = true;
+
+        RefundsEnabled();
+    }
+
+    /**
+     * @dev Contributor call and get his ETH from contract
+     */
+    function getRefundAfterICO() public afterDeadline {
+        require(refundIsAvailable);
+        require(contributors[msg.sender].ethHistory > 0);
+
+        Contributor storage contributor = contributors[msg.sender];
+
+        uint256 depositedValue = contributor.ethHistory;
+        contributor.ethHistory = 0;
+
+        msg.sender.transfer(depositedValue);
+
+        Refunded(msg.sender, depositedValue);
+    }
+
+    /**
+     * @dev Get info about the contributor via address, who participated to crowdsale
+     */
+    function getInfoAboutContributor(address _contributor) public view returns(uint256, bool, uint256, uint256, uint256) {
+        require(_contributor != address(0));
+
+        Contributor memory contributor = contributors[_contributor];
+        return(contributor.eth, contributor.whitelisted, contributor.ethHistory, contributor.tokensPurchasedDuringICO, contributor.bonusGetDuringPrivateSale);
+    }
+
+    /**
+     * @dev Get crowdsale current status (string)
+     */
+    function crowdSaleStatus() public constant returns(string) {
         if (0 == stage) {
             return "ICO does not start yet.";
         }
@@ -174,174 +389,5 @@ contract CaleroICO is Ownable {
 
         return "Crowdsale finished!";
     }
-
-    function _changeDiscount(uint256 _discount) public onlyOwner returns (bool) {
-        ICO = Ico (ICO.tokens, ICO.startDate, ICO.endDate, _discount);
-        return true;
-    }
-
-    function _changeRate(uint256 _numerator, uint256 _denominator) public onlyOwner returns (bool success) {
-        if (_numerator == 0) _numerator = 1;
-        if (_denominator == 0) _denominator = 1;
-
-        buyPrice = (_numerator * 1 ether).div(_denominator);
-
-        return true;
-    }
-
-    /**
-     * @dev the way in which ether is converted to tokens.
-     * @param _weiAmount Value in wei to be converted into tokens
-     * @return Number of tokens that can be purchased with the specified _weiAmount
-     */
-    function _getTokenAmount(uint256 _weiAmount) internal view returns (uint256) {
-        uint256 weiAmount = (_weiAmount * 1 ether).div(buyPrice);
-        require(weiAmount > 0);
-        
-        weiAmount = weiAmount.add(_withDiscount(weiAmount, ICO.discount));
-        return weiAmount;
-    }
-
-    function _withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256){
-        return (_amount.mul(_percent)).div(100);
-    }
-
-    function _refundTokens(address _contributor) internal {
-        Contributor storage contributor = contributors[_contributor];
-
-        uint256 ethAmount = contributor.eth;
-        require(ethAmount > 0);
-
-        contributor.eth = 0;
-        _contributor.transfer(ethAmount);
-    }
-
-    function _whitelistAddress(address _contributor) internal {
-        Contributor storage contributor = contributors[_contributor];
-
-        contributor.whitelisted = true;
-        
-        if (contributor.created == false) {
-            contributor.created = true;
-        }
-        
-        //Auto deliver tokens
-        if (contributor.eth > 0) {
-            _deliverTokens(_contributor);
-        }
-    }
-
-    /**********************owner*************************/
-    function whitelistAddress(address _contributor) public onlyOwner {
-        _whitelistAddress(_contributor);
-    }
     
-    function whitelistAddresses(address[] _contributors) public onlyOwner {
-        for (uint256 i = 0; i < _contributors.length; i++) {
-            _whitelistAddress(_contributors[i]);
-        }
-    }
-
-    function transferEthFromContract(address _to, uint256 amount) public onlyOwner {
-        require(softcapReached);
-        _to.transfer(amount);
-    }
- 
-    // Send Tokens from smart contract (only owner)
-    function sendToken(address _address, uint256 _amountTokens) public onlyOwner returns(bool success){
-        require(_address != 0x0);
-        require(token.transfer(_address, _amountTokens));
-
-        return true;
-    }
-
-    function sendTokens(address[] _addresses, uint256[] _amountTokens) public onlyOwner returns(bool success) {
-        require(_addresses.length > 0);
-        require(_amountTokens.length > 0);
-        require(_addresses.length  == _amountTokens.length);
-
-        for (uint256 i = 0; i < _addresses.length; i++) {
-            sendToken(_addresses[i], _amountTokens[i]);
-        }
-
-        return true;
-    }
-
-    function startCrowd(uint256 _tokens, uint256 _startDate, uint256 _endDate, uint256 _discount) public onlyOwner {
-        require(( _tokens * 1 ether ) <= availableTokens);
-        ICO = Ico (_tokens * 1 ether, _startDate, _endDate, _discount); // _startDate + _endDate * 1 days
-        stage = stage.add(1);
-    }
-
-    /**
-     * @dev Refound tokens. For owner
-     */
-    function refundTokensForAddress(address _contributor) public onlyOwner {
-        _refundTokens(_contributor);
-    }
-
-    function burnAfterICO() public afterDeadline {
-        require(!burned);
-        require(!hardcapReached);
-
-        token.burn(availableTokens);
-        burned = true;
-
-        Burned(availableTokens);
-    }
-
-    /**********************contributor*************************/
-  
-    /**
-    * @dev Refound tokens. For contributors
-    */
-    function refundTokens() public {
-        _refundTokens(msg.sender);
-    }
-
-    /**
-     * @dev Returns tokens according to rate
-     */
-    function getTokenAmount(uint256 _weiAmount) public view returns (uint256) {
-        return _getTokenAmount(_weiAmount);
-    }
-    
-    /**
-     * @dev Returns avaialble tokens for current phase
-     */
-    function getPhaseAvailableTokens() public view returns (uint256) {
-        return ICO.tokens;
-    }
-    
-    /**
-     * @dev Returns available tokens for current phase for sale
-     */
-    function getPhaseBuyableTokens() public view returns (uint256) {
-        uint256 tokensForBuy = ICO.tokens.sub(_withDiscount(ICO.tokens, ICO.discount));
-        return tokensForBuy;
-    }
-
-    function enableRefundAfterICO() public afterDeadline {
-        require(!softcapReached);
-
-        refundIsAvailable = true;
-
-        RefundsEnabled();
-    }
-
-    function getRefundAfterICO() public afterDeadline {
-        require(refundIsAvailable);
-        require(contributors[msg.sender].ethHistory > 0);
-
-        Contributor storage contributor = contributors[msg.sender];
-
-        uint256 depositedValue = contributor.ethHistory;
-        contributor.ethHistory = 0;
-
-        msg.sender.transfer(depositedValue);
-
-        Refunded(msg.sender, depositedValue);
-    }
-    
-
 }

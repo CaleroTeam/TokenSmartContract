@@ -22,6 +22,8 @@ contract TokenTimelock {
     
     function TokenTimelock(ERC20Basic _token, address _beneficiary, uint256 _releaseTime) public {
         require(_releaseTime > uint256(block.timestamp));
+        require(_beneficiary != address(0));
+
         token = _token;
         beneficiary = _beneficiary;
         releaseTime = _releaseTime;

@@ -28,7 +28,6 @@ contract FreezableToken is StandardToken, Ownable {
     // @dev Limit token transfer if _sender is frozen.
     modifier canTransfer(address _sender) {
         require(!frozenAccounts[_sender]);
-
         _;
     }
 
