@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 import "./StandardToken.sol";
 import "./Ownable.sol";
@@ -8,20 +8,20 @@ import "./Ownable.sol";
  * @title FreezableToken
  */
 contract FreezableToken is StandardToken, Ownable {
-    mapping (address => bool) public frozenAccounts;
+    mapping(address => bool) public frozenAccounts;
     event FrozenFunds(address target, bool frozen);
 
     function freezeAccount(address target) public onlyOwner {
         frozenAccounts[target] = true;
-        FrozenFunds(target, true);
+        emit FrozenFunds(target, true);
     }
 
     function unFreezeAccount(address target) public onlyOwner {
         frozenAccounts[target] = false;
-        FrozenFunds(target, false);
+        emit FrozenFunds(target, false);
     }
 
-    function frozen(address _target) constant public returns (bool){
+    function frozen(address _target) constant public returns(bool) {
         return frozenAccounts[_target];
     }
 
@@ -31,12 +31,12 @@ contract FreezableToken is StandardToken, Ownable {
         _;
     }
 
-    function transfer(address _to, uint256 _value) public canTransfer(msg.sender) returns (bool success) {
+    function transfer(address _to, uint256 _value) public canTransfer(msg.sender) returns(bool success) {
         // Call StandardToken.transfer()
         return super.transfer(_to, _value);
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public canTransfer(_from) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value) public canTransfer(_from) returns(bool success) {
         // Call StandardToken.transferForm()
         return super.transferFrom(_from, _to, _value);
     }

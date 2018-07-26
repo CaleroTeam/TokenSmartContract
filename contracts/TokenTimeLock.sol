@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 import "./ERC20Basic.sol";
 import "./SafeERC20.sol";
@@ -9,20 +9,19 @@ import "./SafeERC20.sol";
  * beneficiary to extract the tokens after a given release time
  */
 contract TokenTimelock {
-    using SafeERC20 for ERC20Basic;
+    using SafeERC20 for ERC20;
 
-    // CaleroToken basic token contract being held
-    ERC20Basic public token;
+    // CLE token contract being held
+    ERC20 token;
 
     // beneficiary of tokens after they are released
     address public beneficiary;
 
     // timestamp when token release is enabled
     uint256 public releaseTime;
-    
-    function TokenTimelock(ERC20Basic _token, address _beneficiary, uint256 _releaseTime) public {
-        require(_releaseTime > uint256(block.timestamp));
-        require(_beneficiary != address(0));
+
+    constructor(ERC20 _token, address _beneficiary, uint256 _releaseTime) public {
+        require(_releaseTime > now);
 
         token = _token;
         beneficiary = _beneficiary;
@@ -33,7 +32,7 @@ contract TokenTimelock {
      * @notice Transfers tokens held by timelock to beneficiary.
      */
     function release() public {
-        require(uint256(block.timestamp) >= releaseTime);
+        require(now >= releaseTime);
 
         uint256 amount = token.balanceOf(this);
         require(amount > 0);

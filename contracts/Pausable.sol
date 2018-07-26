@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 
 import "./Ownable.sol";
@@ -12,29 +12,13 @@ contract Pausable is Ownable {
     event Pause();
     event Unpause();
 
-    address public distributionContract;
-
-    bool distributionContractAdded;
     bool public paused = false;
-
-    /**
-     * @dev Add distribution smart contract address
-    */
-    function addDistributionContract(address _contract) external {
-        require(_contract != address(0));
-        require(distributionContractAdded == false);
-
-        distributionContract = _contract;
-        distributionContractAdded = true;
-    }
 
     /**
      * @dev Modifier to make a function callable only when the contract is not paused.
      */
     modifier whenNotPaused() {
-        if(msg.sender != distributionContract) {
-            require(!paused);
-        }
+        require(!paused);
         _;
     }
 
@@ -51,7 +35,7 @@ contract Pausable is Ownable {
      */
     function pause() onlyOwner whenNotPaused public {
         paused = true;
-        Pause();
+        emit Pause();
     }
 
     /**
@@ -59,8 +43,6 @@ contract Pausable is Ownable {
      */
     function unpause() onlyOwner whenPaused public {
         paused = false;
-        Unpause();
+        emit Unpause();
     }
 }
-
-
