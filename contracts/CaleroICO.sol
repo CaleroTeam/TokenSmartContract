@@ -107,7 +107,7 @@ contract CaleroICO is Ownable {
      * @param _weiAmount Value in wei involved in the purchase
      */
     function _getUSDETHPrice(uint256 _weiAmount) internal view returns(uint256) {
-        uint256 usdAmountOfWei = _weiAmount.mul(oraclize.getEthPrice()).div(1 ether);
+        uint256 usdAmountOfWei = _weiAmount.mul(oraclize.getEthPrice());
         return usdAmountOfWei;
     }
 
