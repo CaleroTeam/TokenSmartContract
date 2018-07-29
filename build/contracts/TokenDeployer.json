@@ -26,14 +26,14 @@
     "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/deployers/TokenDeployer.sol",
     "exportedSymbols": {
       "TokenDeployer": [
-        3208
+        3215
       ]
     },
-    "id": 3209,
+    "id": 3216,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3194,
+        "id": 3201,
         "literals": [
           "solidity",
           "^",
@@ -46,10 +46,10 @@
       {
         "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/CaleroToken.sol",
         "file": "../CaleroToken.sol",
-        "id": 3195,
+        "id": 3202,
         "nodeType": "ImportDirective",
-        "scope": 3209,
-        "sourceUnit": 1324,
+        "scope": 3216,
+        "sourceUnit": 1331,
         "src": "26:28:19",
         "symbolAliases": [],
         "unitAlias": ""
@@ -57,42 +57,42 @@
       {
         "baseContracts": [],
         "contractDependencies": [
-          1323
+          1330
         ],
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3208,
+        "id": 3215,
         "linearizedBaseContracts": [
-          3208
+          3215
         ],
         "name": "TokenDeployer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3206,
+              "id": 3213,
               "nodeType": "Block",
               "src": "149:42:19",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3204,
+                    "id": 3211,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3200,
+                      "id": 3207,
                       "name": "token",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3198,
+                      "referencedDeclaration": 3205,
                       "src": "159:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                        "typeIdentifier": "t_contract$_CaleroToken_$1330",
                         "typeString": "contract CaleroToken"
                       }
                     },
@@ -103,7 +103,7 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 3202,
+                        "id": 3209,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -111,23 +111,23 @@
                         "nodeType": "NewExpression",
                         "src": "167:15:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_CaleroToken_$1323_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_CaleroToken_$1330_$",
                           "typeString": "function () returns (contract CaleroToken)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 3201,
+                          "id": 3208,
                           "name": "CaleroToken",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 1323,
+                          "referencedDeclaration": 1330,
                           "src": "171:11:19",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                            "typeIdentifier": "t_contract$_CaleroToken_$1330",
                             "typeString": "contract CaleroToken"
                           }
                         }
                       },
-                      "id": 3203,
+                      "id": 3210,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -137,24 +137,24 @@
                       "nodeType": "FunctionCall",
                       "src": "167:17:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                        "typeIdentifier": "t_contract$_CaleroToken_$1330",
                         "typeString": "contract CaleroToken"
                       }
                     },
                     "src": "159:25:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                      "typeIdentifier": "t_contract$_CaleroToken_$1330",
                       "typeString": "contract CaleroToken"
                     }
                   },
-                  "id": 3205,
+                  "id": 3212,
                   "nodeType": "ExpressionStatement",
                   "src": "159:25:19"
                 }
               ]
             },
             "documentation": null,
-            "id": 3207,
+            "id": 3214,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -162,38 +162,38 @@
             "name": "deployTokenContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3196,
+              "id": 3203,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "112:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3199,
+              "id": 3206,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3198,
+                  "id": 3205,
                   "name": "token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3207,
+                  "scope": 3214,
                   "src": "130:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                    "typeIdentifier": "t_contract$_CaleroToken_$1330",
                     "typeString": "contract CaleroToken"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3197,
+                    "id": 3204,
                     "name": "CaleroToken",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1323,
+                    "referencedDeclaration": 1330,
                     "src": "130:11:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                      "typeIdentifier": "t_contract$_CaleroToken_$1330",
                       "typeString": "contract CaleroToken"
                     }
                   },
@@ -203,14 +203,14 @@
               ],
               "src": "129:19:19"
             },
-            "scope": 3208,
+            "scope": 3215,
             "src": "84:107:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3209,
+        "scope": 3216,
         "src": "56:137:19"
       }
     ],
@@ -220,14 +220,14 @@
     "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/deployers/TokenDeployer.sol",
     "exportedSymbols": {
       "TokenDeployer": [
-        3208
+        3215
       ]
     },
-    "id": 3209,
+    "id": 3216,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3194,
+        "id": 3201,
         "literals": [
           "solidity",
           "^",
@@ -240,10 +240,10 @@
       {
         "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/CaleroToken.sol",
         "file": "../CaleroToken.sol",
-        "id": 3195,
+        "id": 3202,
         "nodeType": "ImportDirective",
-        "scope": 3209,
-        "sourceUnit": 1324,
+        "scope": 3216,
+        "sourceUnit": 1331,
         "src": "26:28:19",
         "symbolAliases": [],
         "unitAlias": ""
@@ -251,42 +251,42 @@
       {
         "baseContracts": [],
         "contractDependencies": [
-          1323
+          1330
         ],
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3208,
+        "id": 3215,
         "linearizedBaseContracts": [
-          3208
+          3215
         ],
         "name": "TokenDeployer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3206,
+              "id": 3213,
               "nodeType": "Block",
               "src": "149:42:19",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3204,
+                    "id": 3211,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3200,
+                      "id": 3207,
                       "name": "token",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3198,
+                      "referencedDeclaration": 3205,
                       "src": "159:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                        "typeIdentifier": "t_contract$_CaleroToken_$1330",
                         "typeString": "contract CaleroToken"
                       }
                     },
@@ -297,7 +297,7 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 3202,
+                        "id": 3209,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -305,23 +305,23 @@
                         "nodeType": "NewExpression",
                         "src": "167:15:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_CaleroToken_$1323_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_CaleroToken_$1330_$",
                           "typeString": "function () returns (contract CaleroToken)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 3201,
+                          "id": 3208,
                           "name": "CaleroToken",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 1323,
+                          "referencedDeclaration": 1330,
                           "src": "171:11:19",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                            "typeIdentifier": "t_contract$_CaleroToken_$1330",
                             "typeString": "contract CaleroToken"
                           }
                         }
                       },
-                      "id": 3203,
+                      "id": 3210,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -331,24 +331,24 @@
                       "nodeType": "FunctionCall",
                       "src": "167:17:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                        "typeIdentifier": "t_contract$_CaleroToken_$1330",
                         "typeString": "contract CaleroToken"
                       }
                     },
                     "src": "159:25:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                      "typeIdentifier": "t_contract$_CaleroToken_$1330",
                       "typeString": "contract CaleroToken"
                     }
                   },
-                  "id": 3205,
+                  "id": 3212,
                   "nodeType": "ExpressionStatement",
                   "src": "159:25:19"
                 }
               ]
             },
             "documentation": null,
-            "id": 3207,
+            "id": 3214,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -356,38 +356,38 @@
             "name": "deployTokenContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3196,
+              "id": 3203,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "112:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3199,
+              "id": 3206,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3198,
+                  "id": 3205,
                   "name": "token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3207,
+                  "scope": 3214,
                   "src": "130:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                    "typeIdentifier": "t_contract$_CaleroToken_$1330",
                     "typeString": "contract CaleroToken"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3197,
+                    "id": 3204,
                     "name": "CaleroToken",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1323,
+                    "referencedDeclaration": 1330,
                     "src": "130:11:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_CaleroToken_$1323",
+                      "typeIdentifier": "t_contract$_CaleroToken_$1330",
                       "typeString": "contract CaleroToken"
                     }
                   },
@@ -397,14 +397,14 @@
               ],
               "src": "129:19:19"
             },
-            "scope": 3208,
+            "scope": 3215,
             "src": "84:107:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3209,
+        "scope": 3216,
         "src": "56:137:19"
       }
     ],
@@ -416,5 +416,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-26T23:22:21.424Z"
+  "updatedAt": "2018-07-29T13:00:43.339Z"
 }

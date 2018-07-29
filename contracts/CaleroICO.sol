@@ -84,6 +84,8 @@ contract CaleroICO is Ownable {
             tokens = tokens.add(bonus);
         }
 
+        usdAmount = usdAmount.div(100); // Removing cents after whole calculation 
+
         _deliverTokens(_beneficiary, tokens);
         _updatePurchasingState(tokens, msg.value, usdAmount);
 
@@ -107,8 +109,8 @@ contract CaleroICO is Ownable {
      * @param _weiAmount Value in wei involved in the purchase
      */
     function _getUSDETHPrice(uint256 _weiAmount) internal view returns(uint256) {
-        uint256 usdAmountOfWei = _weiAmount.mul(oraclize.getEthPrice());
-        return usdAmountOfWei;
+        uint256 usdAmountOfETH = _weiAmount.mul(oraclize.getEthPrice()).div(1 ether);
+        return usdAmountOfETH;
     }
 
     /** 
@@ -117,7 +119,7 @@ contract CaleroICO is Ownable {
      * @return Number of tokens that can be purchased with the specified _usdPrice
      */
     function _getTokenAmount(uint256 _usdPrice) internal view returns(uint256) {
-        uint256 tokensAmaunt = _usdPrice.mul(100).div(pricePerToken);
+        uint256 tokensAmaunt = _usdPrice.div(pricePerToken).mul(1 ether);
         return tokensAmaunt;
     }
 

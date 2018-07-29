@@ -6,7 +6,7 @@ import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
  * @title EthPriceOraclize
  * @dev Using oraclize for getting ETH price from coinmarketcap
  */
-contract EthPriceOraclize is usingOraclize {  
+contract EthPriceOraclize is usingOraclize {
     uint256 public delay = 43200; // 12 hours
     uint256 public ETHUSD;
 
@@ -21,14 +21,14 @@ contract EthPriceOraclize is usingOraclize {
     function EthPriceOraclize() public {
         oraclize_setProof(proofType_TLSNotary | proofStorage_IPFS);
         
-        emit OraclizeCreated(this);
+        OraclizeCreated(this);
         update(1);
     }
 
     function __callback(bytes32 id, string result, bytes proof) public {
         require(msg.sender == oraclize_cbAddress());
         
-        ETHUSD = parseInt(result);
+        ETHUSD = parseInt(result,2);
         LogPriceUpdate(ETHUSD);
 
         update(delay);
@@ -56,36 +56,23 @@ pragma solidity ^0.4.24;
  */
 interface TokenInterface {
     function balanceOf(address _address) external constant returns(uint);
-
     function totalSupply() external constant returns(uint);
-
     function transfer(address to, uint tokens) external returns(bool success);
-
     function transferFrom(address from, address to, uint tokens) external returns(bool success);
-
     function approve(address spender, uint tokens) external returns(bool success);
-
     function allowance(address tokenOwner, address spender) external constant returns(uint remaining);
-
     function burn(uint256 _value) external;
-
     function pause() external;
-
     function unpause() external;
-
     function freezeAccount(address target) external;
-
     function unFreezeAccount(address target) external;
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
 interface CrowdsaleInterface {
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
-
     function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
-
-    function transferERC20(address _token, address _contributor, uint256 _amount) external;
-    
+    function transferERC20(address _token, address _contributor, uint256 _amount) external;  
     function killContract() external;
 }
 
@@ -300,7 +287,6 @@ contract Multiownable {
     }
 
     // CONSTRUCTOR
-
     constructor() public {
         owners.push(msg.sender);
         ownersIndices[msg.sender] = 1;
@@ -416,8 +402,12 @@ contract Multiownable {
  */
 contract Ownable {
     address public owner;
+
     event OwnershipRenounced(address indexed previousOwner);
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev The Ownable constructor sets the original `owner` of the contract to the sender
@@ -471,9 +461,9 @@ contract Ownable {
  * See https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC20Basic {
-    function totalSupply() public view returns (uint256);
-    function balanceOf(address who) public view returns (uint256);
-    function transfer(address to, uint256 value) public returns (bool);
+    function totalSupply() public view returns(uint256);
+    function balanceOf(address who) public view returns(uint256);
+    function transfer(address to, uint256 value) public returns(bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
@@ -581,7 +571,7 @@ contract StandardToken is ERC20, BasicToken {
      * @param _spender address The address which will spend the funds.
      * @return A uint256 specifying the amount of tokens still available for the spender.
      */
-    function allowance(address _owner, address _spender) public view returns(uint256) {
+    function allowance(address _owner, address _spender) public view returns(uint256) { 
         return allowed[_owner][_spender];
     }
 
@@ -595,8 +585,7 @@ contract StandardToken is ERC20, BasicToken {
      * @param _addedValue The amount of tokens to increase the allowance by.
      */
     function increaseApproval(address _spender, uint256 _addedValue) public returns(bool) {
-        allowed[msg.sender][_spender] = (
-            allowed[msg.sender][_spender].add(_addedValue));
+        allowed[msg.sender][_spender] = (allowed[msg.sender][_spender].add(_addedValue));
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;
     }
@@ -671,24 +660,23 @@ contract Pausable is Ownable {
  * @dev StandardToken modified with pausable transfers.
  **/
 contract PausableToken is StandardToken, Pausable {
-
-    function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {
+    function transfer(address _to, uint256 _value) public whenNotPaused returns(bool) {
         return super.transfer(_to, _value);
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns(bool) {
         return super.transferFrom(_from, _to, _value);
     }
 
-    function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {
+    function approve( address _spender, uint256 _value) public whenNotPaused returns(bool) {
         return super.approve(_spender, _value);
     }
 
-    function increaseApproval(address _spender, uint _addedValue) public whenNotPaused returns (bool success) {
+    function increaseApproval( address _spender, uint _addedValue) public whenNotPaused returns(bool success) {
         return super.increaseApproval(_spender, _addedValue);
     }
 
-    function decreaseApproval(address _spender, uint _subtractedValue) public whenNotPaused returns (bool success) {
+    function decreaseApproval(address _spender, uint _subtractedValue) public whenNotPaused returns(bool success) {
         return super.decreaseApproval(_spender, _subtractedValue);
     }
 }
@@ -766,11 +754,10 @@ contract FreezableToken is StandardToken, Ownable {
  * and forwarding it if crowdsale is successful.
  */
 contract RefundVault is Ownable {
-    using SafeMath
-    for uint256;
+    using SafeMath for uint256;
 
     enum State {
-        Active,
+        Active, 
         Refunding,
         Closed
     }
@@ -1091,6 +1078,8 @@ contract CaleroICO is Ownable {
             tokens = tokens.add(bonus);
         }
 
+        usdAmount = usdAmount.div(100); // Removing cents after whole calculation 
+
         _deliverTokens(_beneficiary, tokens);
         _updatePurchasingState(tokens, msg.value, usdAmount);
 
@@ -1114,8 +1103,8 @@ contract CaleroICO is Ownable {
      * @param _weiAmount Value in wei involved in the purchase
      */
     function _getUSDETHPrice(uint256 _weiAmount) internal view returns(uint256) {
-        uint256 usdAmountOfWei = _weiAmount.mul(oraclize.getEthPrice());
-        return usdAmountOfWei;
+        uint256 usdAmountOfETH = _weiAmount.mul(oraclize.getEthPrice()).div(1 ether);
+        return usdAmountOfETH;
     }
 
     /** 
@@ -1124,7 +1113,7 @@ contract CaleroICO is Ownable {
      * @return Number of tokens that can be purchased with the specified _usdPrice
      */
     function _getTokenAmount(uint256 _usdPrice) internal view returns(uint256) {
-        uint256 tokensAmaunt = _usdPrice.mul(100).div(pricePerToken);
+        uint256 tokensAmaunt = _usdPrice.div(pricePerToken).mul(1 ether);
         return tokensAmaunt;
     }
 

@@ -35,14 +35,14 @@
     "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/deployers/VaultDeployer.sol",
     "exportedSymbols": {
       "VaultDeployer": [
-        3230
+        3237
       ]
     },
-    "id": 3231,
+    "id": 3238,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3210,
+        "id": 3217,
         "literals": [
           "solidity",
           "^",
@@ -55,10 +55,10 @@
       {
         "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/RefundVault.sol",
         "file": "../RefundVault.sol",
-        "id": 3211,
+        "id": 3218,
         "nodeType": "ImportDirective",
-        "scope": 3231,
-        "sourceUnit": 2722,
+        "scope": 3238,
+        "sourceUnit": 2729,
         "src": "26:28:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -66,42 +66,42 @@
       {
         "baseContracts": [],
         "contractDependencies": [
-          2721
+          2728
         ],
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3230,
+        "id": 3237,
         "linearizedBaseContracts": [
-          3230
+          3237
         ],
         "name": "VaultDeployer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3228,
+              "id": 3235,
               "nodeType": "Block",
               "src": "180:57:20",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3226,
+                    "id": 3233,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3220,
+                      "id": 3227,
                       "name": "vault",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3218,
+                      "referencedDeclaration": 3225,
                       "src": "190:5:20",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_RefundVault_$2721",
+                        "typeIdentifier": "t_contract$_RefundVault_$2728",
                         "typeString": "contract RefundVault"
                       }
                     },
@@ -112,11 +112,11 @@
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 3223,
+                          "id": 3230,
                           "name": "_wallet",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3213,
+                          "referencedDeclaration": 3220,
                           "src": "214:7:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -125,11 +125,11 @@
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3224,
+                          "id": 3231,
                           "name": "_token",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3215,
+                          "referencedDeclaration": 3222,
                           "src": "223:6:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -148,7 +148,7 @@
                             "typeString": "address"
                           }
                         ],
-                        "id": 3222,
+                        "id": 3229,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -156,23 +156,23 @@
                         "nodeType": "NewExpression",
                         "src": "198:15:20",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_address_$returns$_t_contract$_RefundVault_$2721_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_address_$returns$_t_contract$_RefundVault_$2728_$",
                           "typeString": "function (address,address) returns (contract RefundVault)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 3221,
+                          "id": 3228,
                           "name": "RefundVault",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 2721,
+                          "referencedDeclaration": 2728,
                           "src": "202:11:20",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_RefundVault_$2721",
+                            "typeIdentifier": "t_contract$_RefundVault_$2728",
                             "typeString": "contract RefundVault"
                           }
                         }
                       },
-                      "id": 3225,
+                      "id": 3232,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -182,24 +182,24 @@
                       "nodeType": "FunctionCall",
                       "src": "198:32:20",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_RefundVault_$2721",
+                        "typeIdentifier": "t_contract$_RefundVault_$2728",
                         "typeString": "contract RefundVault"
                       }
                     },
                     "src": "190:40:20",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_RefundVault_$2721",
+                      "typeIdentifier": "t_contract$_RefundVault_$2728",
                       "typeString": "contract RefundVault"
                     }
                   },
-                  "id": 3227,
+                  "id": 3234,
                   "nodeType": "ExpressionStatement",
                   "src": "190:40:20"
                 }
               ]
             },
             "documentation": null,
-            "id": 3229,
+            "id": 3236,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -207,15 +207,15 @@
             "name": "deployVaultContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3216,
+              "id": 3223,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3213,
+                  "id": 3220,
                   "name": "_wallet",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "113:15:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -224,7 +224,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3212,
+                    "id": 3219,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "113:7:20",
@@ -238,10 +238,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 3215,
+                  "id": 3222,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "130:14:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -250,7 +250,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3214,
+                    "id": 3221,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "130:7:20",
@@ -267,31 +267,31 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3219,
+              "id": 3226,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3218,
+                  "id": 3225,
                   "name": "vault",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "161:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_RefundVault_$2721",
+                    "typeIdentifier": "t_contract$_RefundVault_$2728",
                     "typeString": "contract RefundVault"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3217,
+                    "id": 3224,
                     "name": "RefundVault",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2721,
+                    "referencedDeclaration": 2728,
                     "src": "161:11:20",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_RefundVault_$2721",
+                      "typeIdentifier": "t_contract$_RefundVault_$2728",
                       "typeString": "contract RefundVault"
                     }
                   },
@@ -301,14 +301,14 @@
               ],
               "src": "160:19:20"
             },
-            "scope": 3230,
+            "scope": 3237,
             "src": "84:153:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3231,
+        "scope": 3238,
         "src": "56:183:20"
       }
     ],
@@ -318,14 +318,14 @@
     "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/deployers/VaultDeployer.sol",
     "exportedSymbols": {
       "VaultDeployer": [
-        3230
+        3237
       ]
     },
-    "id": 3231,
+    "id": 3238,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3210,
+        "id": 3217,
         "literals": [
           "solidity",
           "^",
@@ -338,10 +338,10 @@
       {
         "absolutePath": "/Users/arikdonovan/Desktop/TokenSmartContract/contracts/RefundVault.sol",
         "file": "../RefundVault.sol",
-        "id": 3211,
+        "id": 3218,
         "nodeType": "ImportDirective",
-        "scope": 3231,
-        "sourceUnit": 2722,
+        "scope": 3238,
+        "sourceUnit": 2729,
         "src": "26:28:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -349,42 +349,42 @@
       {
         "baseContracts": [],
         "contractDependencies": [
-          2721
+          2728
         ],
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3230,
+        "id": 3237,
         "linearizedBaseContracts": [
-          3230
+          3237
         ],
         "name": "VaultDeployer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3228,
+              "id": 3235,
               "nodeType": "Block",
               "src": "180:57:20",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3226,
+                    "id": 3233,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3220,
+                      "id": 3227,
                       "name": "vault",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3218,
+                      "referencedDeclaration": 3225,
                       "src": "190:5:20",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_RefundVault_$2721",
+                        "typeIdentifier": "t_contract$_RefundVault_$2728",
                         "typeString": "contract RefundVault"
                       }
                     },
@@ -395,11 +395,11 @@
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 3223,
+                          "id": 3230,
                           "name": "_wallet",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3213,
+                          "referencedDeclaration": 3220,
                           "src": "214:7:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -408,11 +408,11 @@
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3224,
+                          "id": 3231,
                           "name": "_token",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3215,
+                          "referencedDeclaration": 3222,
                           "src": "223:6:20",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -431,7 +431,7 @@
                             "typeString": "address"
                           }
                         ],
-                        "id": 3222,
+                        "id": 3229,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -439,23 +439,23 @@
                         "nodeType": "NewExpression",
                         "src": "198:15:20",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_address_$returns$_t_contract$_RefundVault_$2721_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_address_$returns$_t_contract$_RefundVault_$2728_$",
                           "typeString": "function (address,address) returns (contract RefundVault)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 3221,
+                          "id": 3228,
                           "name": "RefundVault",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 2721,
+                          "referencedDeclaration": 2728,
                           "src": "202:11:20",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_RefundVault_$2721",
+                            "typeIdentifier": "t_contract$_RefundVault_$2728",
                             "typeString": "contract RefundVault"
                           }
                         }
                       },
-                      "id": 3225,
+                      "id": 3232,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -465,24 +465,24 @@
                       "nodeType": "FunctionCall",
                       "src": "198:32:20",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_RefundVault_$2721",
+                        "typeIdentifier": "t_contract$_RefundVault_$2728",
                         "typeString": "contract RefundVault"
                       }
                     },
                     "src": "190:40:20",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_RefundVault_$2721",
+                      "typeIdentifier": "t_contract$_RefundVault_$2728",
                       "typeString": "contract RefundVault"
                     }
                   },
-                  "id": 3227,
+                  "id": 3234,
                   "nodeType": "ExpressionStatement",
                   "src": "190:40:20"
                 }
               ]
             },
             "documentation": null,
-            "id": 3229,
+            "id": 3236,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -490,15 +490,15 @@
             "name": "deployVaultContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3216,
+              "id": 3223,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3213,
+                  "id": 3220,
                   "name": "_wallet",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "113:15:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -507,7 +507,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3212,
+                    "id": 3219,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "113:7:20",
@@ -521,10 +521,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 3215,
+                  "id": 3222,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "130:14:20",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -533,7 +533,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3214,
+                    "id": 3221,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "130:7:20",
@@ -550,31 +550,31 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3219,
+              "id": 3226,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3218,
+                  "id": 3225,
                   "name": "vault",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3229,
+                  "scope": 3236,
                   "src": "161:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_RefundVault_$2721",
+                    "typeIdentifier": "t_contract$_RefundVault_$2728",
                     "typeString": "contract RefundVault"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3217,
+                    "id": 3224,
                     "name": "RefundVault",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2721,
+                    "referencedDeclaration": 2728,
                     "src": "161:11:20",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_RefundVault_$2721",
+                      "typeIdentifier": "t_contract$_RefundVault_$2728",
                       "typeString": "contract RefundVault"
                     }
                   },
@@ -584,14 +584,14 @@
               ],
               "src": "160:19:20"
             },
-            "scope": 3230,
+            "scope": 3237,
             "src": "84:153:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3231,
+        "scope": 3238,
         "src": "56:183:20"
       }
     ],
@@ -603,5 +603,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-26T23:22:21.425Z"
+  "updatedAt": "2018-07-29T13:00:43.338Z"
 }

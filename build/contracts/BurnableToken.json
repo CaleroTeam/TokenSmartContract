@@ -171,7 +171,7 @@
           }
         ],
         "contractDependencies": [
-          1398,
+          1405,
           95
         ],
         "contractKind": "contract",
@@ -181,7 +181,7 @@
         "linearizedBaseContracts": [
           166,
           95,
-          1398
+          1405
         ],
         "name": "BurnableToken",
         "nodeType": "ContractDefinition",
@@ -273,7 +273,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9302,
+                          "referencedDeclaration": 9310,
                           "src": "418:3:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -498,10 +498,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        9305,
-                        9306
+                        9313,
+                        9314
                       ],
-                      "referencedDeclaration": 9305,
+                      "referencedDeclaration": 9313,
                       "src": "514:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -647,7 +647,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2813,
+                        "referencedDeclaration": 2820,
                         "src": "754:18:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -745,7 +745,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2813,
+                        "referencedDeclaration": 2820,
                         "src": "805:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -953,7 +953,7 @@
                       "name": "Transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1397,
+                      "referencedDeclaration": 1404,
                       "src": "877:8:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -1121,7 +1121,7 @@
           }
         ],
         "contractDependencies": [
-          1398,
+          1405,
           95
         ],
         "contractKind": "contract",
@@ -1131,7 +1131,7 @@
         "linearizedBaseContracts": [
           166,
           95,
-          1398
+          1405
         ],
         "name": "BurnableToken",
         "nodeType": "ContractDefinition",
@@ -1223,7 +1223,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9302,
+                          "referencedDeclaration": 9310,
                           "src": "418:3:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1448,10 +1448,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        9305,
-                        9306
+                        9313,
+                        9314
                       ],
-                      "referencedDeclaration": 9305,
+                      "referencedDeclaration": 9313,
                       "src": "514:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1597,7 +1597,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2813,
+                        "referencedDeclaration": 2820,
                         "src": "754:18:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1695,7 +1695,7 @@
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2813,
+                        "referencedDeclaration": 2820,
                         "src": "805:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -1903,7 +1903,7 @@
                       "name": "Transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1397,
+                      "referencedDeclaration": 1404,
                       "src": "877:8:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -2023,5 +2023,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-26T23:22:21.379Z"
+  "updatedAt": "2018-07-29T13:00:43.286Z"
 }
