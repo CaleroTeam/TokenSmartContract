@@ -11,7 +11,7 @@ import "./TokenTimeLock.sol";
  */
 contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
     string public constant name = "\"Calero\" Project utility token";
-    string public constant symbol = "CLO";
+    string public constant symbol = "CLOR";
     uint8 public constant decimals = 18;
 
     uint256 public constant INITIAL_SUPPLY = 150000000 * 1 ether; // 150 million total supply
@@ -24,7 +24,7 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
     // Locked tokens contract addresses
     address public lockedTeamTokensAddress;
     address public lockedContributorsTokensAddress;
-    
+
     event TokenTimeLockEnabled(address _contractAddress, uint256 _tokensAmaunt, uint256 _releaseTime, address _beneficiary);
 
     /**
@@ -38,9 +38,9 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
         uint256 contributorsTokensAmaunt = (totalSupply_.mul(10)).div(100); // 10% from total supply
         uint256 reserveTokensAmaunt = (totalSupply_.mul(20)).div(100); // 20% from total supply
         uint256 crowdsaleTokensAmaunt = (totalSupply_.mul(59)).div(100); // 59% from total supply
-    
+
         uint256 teamTokensLockTime = uint256(block.timestamp) + 365 days; // Lock for 1 year
-        uint256 contributorsTokensLockTime = uint256(block.timestamp) + 60 days; // Lock for 60 days 
+        uint256 contributorsTokensLockTime = uint256(block.timestamp) + 60 days; // Lock for 60 days
 
         // Create timelock contract for team and contributors tokens
         TokenTimelock lockedTeamTokens = new TokenTimelock(this, teamWalletAddress, teamTokensLockTime);
@@ -50,7 +50,7 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
         lockedTeamTokensAddress = address(lockedTeamTokens);
         lockedContributorsTokensAddress = address(lockedContributorsTokens);
 
-        // Distributing tokens 
+        // Distributing tokens
         balances[lockedTeamTokensAddress] = balances[lockedTeamTokensAddress].add(teamTokensAmaunt);
         balances[lockedContributorsTokensAddress] = balances[lockedContributorsTokensAddress].add(contributorsTokensAmaunt);
         balances[reserveWalletAddress] = balances[reserveWalletAddress].add(reserveTokensAmaunt);

@@ -13,21 +13,21 @@ contract EthPriceOraclize is usingOraclize {
     event OraclizeCreated(address _oraclize);
     event LogInfo(string description);
     event LogPriceUpdate(uint256 price);
-    
+
     function() external payable {
         update(1);
     }
 
     function EthPriceOraclize() public {
         oraclize_setProof(proofType_TLSNotary | proofStorage_IPFS);
-        
+
         OraclizeCreated(this);
         update(1);
     }
 
     function __callback(bytes32 id, string result, bytes proof) public {
         require(msg.sender == oraclize_cbAddress());
-        
+
         ETHUSD = parseInt(result,2);
         LogPriceUpdate(ETHUSD);
 
@@ -42,7 +42,7 @@ contract EthPriceOraclize is usingOraclize {
             oraclize_query(_delay, "URL", "json(https://api.coinmarketcap.com/v1/ticker/ethereum/).0.price_usd");
         }
     }
-    
+
     function getEthPrice() external view returns(uint256) {
         return ETHUSD;
     }
@@ -72,7 +72,7 @@ interface TokenInterface {
 interface CrowdsaleInterface {
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
     function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
-    function transferERC20(address _token, address _contributor, uint256 _amount) external;  
+    function transferERC20(address _token, address _contributor, uint256 _amount) external;
     function killContract() external;
 }
 
@@ -162,11 +162,6 @@ library VaultDeployer {
     }
 }
 
-/**
- * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
- */
 contract Multiownable {
 
     // VARIABLES
@@ -192,7 +187,7 @@ contract Multiownable {
     event OperationCreated(bytes32 operation, uint howMany, uint ownersCount, address proposer);
     event OperationUpvoted(bytes32 operation, uint votes, uint howMany, uint ownersCount, address upvoter);
     event OperationPerformed(bytes32 operation, uint howMany, uint ownersCount, address performer);
-    event OperationDownvoted(bytes32 operation, uint votes, uint ownersCount, address downvoter);
+    event OperationDownvoted(bytes32 operation, uint votes, uint ownersCount,  address downvoter);
     event OperationCancelled(bytes32 operation, address lastCanceller);
 
     // ACCESSORS
@@ -212,8 +207,8 @@ contract Multiownable {
     // MODIFIERS
 
     /**
-     * @dev Allows to perform method by any of the owners
-     */
+    * @dev Allows to perform method by any of the owners
+    */
     modifier onlyAnyOwner {
         if (checkHowManyOwners(1)) {
             bool update = (insideCallSender == address(0));
@@ -230,8 +225,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after many owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after many owners call it with the same arguments
+    */
     modifier onlyManyOwners {
         if (checkHowManyOwners(howManyOwnersDecide)) {
             bool update = (insideCallSender == address(0));
@@ -248,8 +243,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after all owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after all owners call it with the same arguments
+    */
     modifier onlyAllOwners {
         if (checkHowManyOwners(owners.length)) {
             bool update = (insideCallSender == address(0));
@@ -266,8 +261,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after some owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after some owners call it with the same arguments
+    */
     modifier onlySomeOwners(uint howMany) {
         require(howMany > 0, "onlySomeOwners: howMany argument is zero");
         require(howMany <= owners.length, "onlySomeOwners: howMany argument exceeds the number of owners");
@@ -330,9 +325,9 @@ contract Multiownable {
     }
 
     /**
-     * @dev Used to delete cancelled or performed operation
-     * @param operation defines which operation to delete
-     */
+    * @dev Used to delete cancelled or performed operation
+    * @param operation defines which operation to delete
+    */
     function deleteOperation(bytes32 operation) internal {
         uint index = allOperationsIndicies[operation];
         if (index < allOperations.length - 1) { // Not last
@@ -349,9 +344,9 @@ contract Multiownable {
     // PUBLIC METHODS
 
     /**
-     * @dev Allows owners to change their mind by cacnelling votesMaskByOperation operations
-     * @param operation defines which operation to delete
-     */
+    * @dev Allows owners to change their mind by cacnelling votesMaskByOperation operations
+    * @param operation defines which operation to delete
+    */
     function cancelPending(bytes32 operation) public onlyAnyOwner {
         uint ownerIndex = ownersIndices[msg.sender] - 1;
         require((votesMaskByOperation[operation] & (2 ** ownerIndex)) != 0, "cancelPending: operation not found for this user");
@@ -366,10 +361,10 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows owners to change ownership
-     * @param newOwners defines array of addresses of new owners
-     * @param newHowManyOwnersDecide defines how many owners can decide
-     */
+    * @dev Allows owners to change ownership
+    * @param newOwners defines array of addresses of new owners
+    * @param newHowManyOwnersDecide defines how many owners can decide
+    */
     function transferOwnershipWithHowMany(address[] newOwners, uint256 newHowManyOwnersDecide) public onlyManyOwners {
         require(newOwners.length > 0, "transferOwnershipWithHowMany: owners array is empty");
         require(newOwners.length <= 256, "transferOwnershipWithHowMany: owners count is greater then 256");
@@ -519,6 +514,7 @@ contract BasicToken is ERC20Basic {
     function balanceOf(address _owner) public view returns(uint256) {
         return balances[_owner];
     }
+
 }
 
 /**
@@ -571,7 +567,7 @@ contract StandardToken is ERC20, BasicToken {
      * @param _spender address The address which will spend the funds.
      * @return A uint256 specifying the amount of tokens still available for the spender.
      */
-    function allowance(address _owner, address _spender) public view returns(uint256) { 
+    function allowance(address _owner, address _spender) public view returns(uint256) {
         return allowed[_owner][_spender];
     }
 
@@ -757,7 +753,7 @@ contract RefundVault is Ownable {
     using SafeMath for uint256;
 
     enum State {
-        Active, 
+        Active,
         Refunding,
         Closed
     }
@@ -834,7 +830,7 @@ contract RefundVault is Ownable {
 contract TokenTimelock {
     using SafeERC20 for ERC20;
 
-    // CLE token contract being held
+    // CLOR token contract being held
     ERC20 token;
 
     // beneficiary of tokens after they are released
@@ -869,7 +865,7 @@ contract TokenTimelock {
  */
 contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
     string public constant name = "\"Calero\" Project utility token";
-    string public constant symbol = "CLO";
+    string public constant symbol = "CLOR";
     uint8 public constant decimals = 18;
 
     uint256 public constant INITIAL_SUPPLY = 150000000 * 1 ether; // 150 million total supply
@@ -882,7 +878,7 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
     // Locked tokens contract addresses
     address public lockedTeamTokensAddress;
     address public lockedContributorsTokensAddress;
-    
+
     event TokenTimeLockEnabled(address _contractAddress, uint256 _tokensAmaunt, uint256 _releaseTime, address _beneficiary);
 
     /**
@@ -896,9 +892,9 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
         uint256 contributorsTokensAmaunt = (totalSupply_.mul(10)).div(100); // 10% from total supply
         uint256 reserveTokensAmaunt = (totalSupply_.mul(20)).div(100); // 20% from total supply
         uint256 crowdsaleTokensAmaunt = (totalSupply_.mul(59)).div(100); // 59% from total supply
-    
+
         uint256 teamTokensLockTime = uint256(block.timestamp) + 365 days; // Lock for 1 year
-        uint256 contributorsTokensLockTime = uint256(block.timestamp) + 60 days; // Lock for 60 days 
+        uint256 contributorsTokensLockTime = uint256(block.timestamp) + 60 days; // Lock for 60 days
 
         // Create timelock contract for team and contributors tokens
         TokenTimelock lockedTeamTokens = new TokenTimelock(this, teamWalletAddress, teamTokensLockTime);
@@ -908,7 +904,7 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
         lockedTeamTokensAddress = address(lockedTeamTokens);
         lockedContributorsTokensAddress = address(lockedContributorsTokens);
 
-        // Distributing tokens 
+        // Distributing tokens
         balances[lockedTeamTokensAddress] = balances[lockedTeamTokensAddress].add(teamTokensAmaunt);
         balances[lockedContributorsTokensAddress] = balances[lockedContributorsTokensAddress].add(contributorsTokensAmaunt);
         balances[reserveWalletAddress] = balances[reserveWalletAddress].add(reserveTokensAmaunt);
@@ -944,7 +940,7 @@ contract CaleroController is Multiownable {
     function initCrowdsale() external onlyManyOwners {
         address _ico = CrowdsaleDeployer.deployCrowdsaleContract(address(token));
         ico = CrowdsaleInterface(_ico);
-    
+
         token.transfer(_ico, token.balanceOf(this));  // Transfer all crowdsale tokens from controller to crowdsale contract
     }
 
@@ -978,13 +974,13 @@ contract CaleroController is Multiownable {
     }
 
     function freezeAccount(address _target) external onlyAnyOwner {
-        require(_target != address(0));
+        require(_target != address(0), "freezeAccount: the target address is not correct");
 
         token.freezeAccount(_target);
     }
 
     function unFreezeAccount(address _target) external onlyAnyOwner {
-        require(_target != address(0));
+        require(_target != address(0), "unFreezeAccount: the target address is not correct");
 
         token.unFreezeAccount(_target);
     }
@@ -996,7 +992,7 @@ contract CaleroController is Multiownable {
     function resume() external onlyAnyOwner {
         token.unpause();
     }
-    
+
     function killICOContract() external onlyManyOwners {
         ico.killContract();
     }
@@ -1008,12 +1004,12 @@ contract CaleroController is Multiownable {
 contract CaleroICO is Ownable {
     using SafeMath for uint256;
 
-    uint256 public pricePerToken = 40; // 1 CLO - 40 cents or $0.4
+    uint256 public pricePerToken = 40; // 1 CLOR - 40 cents or $0.4
     uint256 public weiRaised;
     uint256 public usdRaised;
     uint256 public tokensSold;
 
-    uint256 public softCap = 5000000; // sofcap is $5 mln 
+    uint256 public softCap = 5000000; // sofcap is $5 mln
 
     uint256 public stage = 0;
     uint256 public minContributionAmount = 10 ** 17; // 0.1 ETH
@@ -1072,13 +1068,13 @@ contract CaleroICO is Ownable {
 
         uint256 usdAmount = _getUSDETHPrice(msg.value);
         uint256 tokens = _getTokenAmount(usdAmount);
-        
+
         if(ICO.bonus != 0) {
             uint256 bonus = _getBonus(tokens);
             tokens = tokens.add(bonus);
         }
 
-        usdAmount = usdAmount.div(100); // Removing cents after whole calculation 
+        usdAmount = usdAmount.div(100); // Removing cents after whole calculation
 
         _deliverTokens(_beneficiary, tokens);
         _updatePurchasingState(tokens, msg.value, usdAmount);
@@ -1095,7 +1091,7 @@ contract CaleroICO is Ownable {
      */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal view {
         require(_beneficiary != address(0));
-        require(_weiAmount >= minContributionAmount);
+        require(_weiAmount >= minContributionAmount, "_preValidatePurchase: ETH amount is smaller than the minimum contribution amount");
     }
 
     /**
@@ -1107,7 +1103,7 @@ contract CaleroICO is Ownable {
         return usdAmountOfETH;
     }
 
-    /** 
+    /**
      * @dev Override to extend the way in which ether is converted to tokens.
      * @param _usdPrice Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _usdPrice
@@ -1122,7 +1118,7 @@ contract CaleroICO is Ownable {
      * @param _amount Amount, which we need to calculate
      */
     function _getBonus(uint256 _amount) internal view returns(uint256) {
-        return _amount.mul(ICO.bonus).div(100); 
+        return _amount.mul(ICO.bonus).div(100);
     }
 
     /**
@@ -1134,7 +1130,7 @@ contract CaleroICO is Ownable {
         token.transfer(_beneficiary, _tokenAmount);
     }
 
-    /** 
+    /**
      * @dev Override for extensions that require an internal state to check for validity (current user contributions, etc.)
      * @param _tokens Tokens which are purchased
      */
@@ -1164,7 +1160,7 @@ contract CaleroICO is Ownable {
     function _postValidatePurchase() internal {
         if (!softCapReached && usdRaised >= softCap) {
             softCapReached = true;
-            
+
             emit SoftCapReached(now);
         }
     }
@@ -1173,9 +1169,9 @@ contract CaleroICO is Ownable {
      * @dev Start crowdsale phase
      */
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) public onlyOwner {
-        require(_tokens <= token.balanceOf(address(this)));
-        require(_startDate != 0 && _finishDate != 0);
-        require(_bonus < 100);
+        require(_tokens <= token.balanceOf(this), "startPhase: amount of tokens is not enough for start");
+        require(_startDate != 0 && _finishDate != 0, "startPhase: finishdate/startdate are not correct");
+        require(_bonus < 100, "startPhase: the bonus size should be smaller of 100");
 
         ICO = Ico(_tokens, _bonus, _startDate, _finishDate, false);
         stage = stage.add(1);
@@ -1187,8 +1183,8 @@ contract CaleroICO is Ownable {
      * @dev Finish the crowdsale, enable refund or send all money to owner address
      */
     function finalizeCrowdsale() external {
-        require(finalizeIsAvailable);
-        require(stage > 3);
+        require(finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
+        require(stage > 3, "finalizeCrowdsale: finalize is not available yet");
 
         finalizeIsAvailable = false;
 
@@ -1232,14 +1228,13 @@ contract CaleroICO is Ownable {
 
         return "Crowdsale finished!";
     }
-    
-    /** 
+
+    /**
      * @dev selfDistruct
      */
     function killContract() external onlyOwner {
-        require(!finalizeIsAvailable);
-        
+        require(!finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
+
         selfdestruct(owner);
     }
-    
 }

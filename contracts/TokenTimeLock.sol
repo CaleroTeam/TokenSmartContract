@@ -11,7 +11,7 @@ import "./SafeERC20.sol";
 contract TokenTimelock {
     using SafeERC20 for ERC20;
 
-    // CLE token contract being held
+    // CLOR token contract being held
     ERC20 token;
 
     // beneficiary of tokens after they are released

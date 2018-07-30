@@ -28,7 +28,7 @@ contract CaleroController is Multiownable {
     function initCrowdsale() external onlyManyOwners {
         address _ico = CrowdsaleDeployer.deployCrowdsaleContract(address(token));
         ico = CrowdsaleInterface(_ico);
-    
+
         token.transfer(_ico, token.balanceOf(this));  // Transfer all crowdsale tokens from controller to crowdsale contract
     }
 
@@ -62,13 +62,13 @@ contract CaleroController is Multiownable {
     }
 
     function freezeAccount(address _target) external onlyAnyOwner {
-        require(_target != address(0));
+        require(_target != address(0), "freezeAccount: the target address is not correct");
 
         token.freezeAccount(_target);
     }
 
     function unFreezeAccount(address _target) external onlyAnyOwner {
-        require(_target != address(0));
+        require(_target != address(0), "unFreezeAccount: the target address is not correct");
 
         token.unFreezeAccount(_target);
     }
@@ -80,7 +80,7 @@ contract CaleroController is Multiownable {
     function resume() external onlyAnyOwner {
         token.unpause();
     }
-    
+
     function killICOContract() external onlyManyOwners {
         ico.killContract();
     }

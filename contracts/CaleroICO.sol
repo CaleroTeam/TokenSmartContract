@@ -14,12 +14,12 @@ import './RefundVault.sol';
 contract CaleroICO is Ownable {
     using SafeMath for uint256;
 
-    uint256 public pricePerToken = 40; // 1 CLO - 40 cents or $0.4
+    uint256 public pricePerToken = 40; // 1 CLOR - 40 cents or $0.4
     uint256 public weiRaised;
     uint256 public usdRaised;
     uint256 public tokensSold;
 
-    uint256 public softCap = 5000000; // sofcap is $5 mln 
+    uint256 public softCap = 5000000; // sofcap is $5 mln
 
     uint256 public stage = 0;
     uint256 public minContributionAmount = 10 ** 17; // 0.1 ETH
@@ -78,13 +78,13 @@ contract CaleroICO is Ownable {
 
         uint256 usdAmount = _getUSDETHPrice(msg.value);
         uint256 tokens = _getTokenAmount(usdAmount);
-        
+
         if(ICO.bonus != 0) {
             uint256 bonus = _getBonus(tokens);
             tokens = tokens.add(bonus);
         }
 
-        usdAmount = usdAmount.div(100); // Removing cents after whole calculation 
+        usdAmount = usdAmount.div(100); // Removing cents after whole calculation
 
         _deliverTokens(_beneficiary, tokens);
         _updatePurchasingState(tokens, msg.value, usdAmount);
@@ -101,7 +101,7 @@ contract CaleroICO is Ownable {
      */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal view {
         require(_beneficiary != address(0));
-        require(_weiAmount >= minContributionAmount);
+        require(_weiAmount >= minContributionAmount, "_preValidatePurchase: ETH amount is smaller than the minimum contribution amount");
     }
 
     /**
@@ -113,7 +113,7 @@ contract CaleroICO is Ownable {
         return usdAmountOfETH;
     }
 
-    /** 
+    /**
      * @dev Override to extend the way in which ether is converted to tokens.
      * @param _usdPrice Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _usdPrice
@@ -128,7 +128,7 @@ contract CaleroICO is Ownable {
      * @param _amount Amount, which we need to calculate
      */
     function _getBonus(uint256 _amount) internal view returns(uint256) {
-        return _amount.mul(ICO.bonus).div(100); 
+        return _amount.mul(ICO.bonus).div(100);
     }
 
     /**
@@ -140,7 +140,7 @@ contract CaleroICO is Ownable {
         token.transfer(_beneficiary, _tokenAmount);
     }
 
-    /** 
+    /**
      * @dev Override for extensions that require an internal state to check for validity (current user contributions, etc.)
      * @param _tokens Tokens which are purchased
      */
@@ -170,7 +170,7 @@ contract CaleroICO is Ownable {
     function _postValidatePurchase() internal {
         if (!softCapReached && usdRaised >= softCap) {
             softCapReached = true;
-            
+
             emit SoftCapReached(now);
         }
     }
@@ -179,9 +179,9 @@ contract CaleroICO is Ownable {
      * @dev Start crowdsale phase
      */
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) public onlyOwner {
-        require(_tokens <= token.balanceOf(address(this)));
-        require(_startDate != 0 && _finishDate != 0);
-        require(_bonus < 100);
+        require(_tokens <= token.balanceOf(this), "startPhase: amount of tokens is not enough for start");
+        require(_startDate != 0 && _finishDate != 0, "startPhase: finishdate/startdate are not correct");
+        require(_bonus < 100, "startPhase: the bonus size should be smaller of 100");
 
         ICO = Ico(_tokens, _bonus, _startDate, _finishDate, false);
         stage = stage.add(1);
@@ -193,8 +193,8 @@ contract CaleroICO is Ownable {
      * @dev Finish the crowdsale, enable refund or send all money to owner address
      */
     function finalizeCrowdsale() external {
-        require(finalizeIsAvailable);
-        require(stage > 3);
+        require(finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
+        require(stage > 3, "finalizeCrowdsale: finalize is not available yet");
 
         finalizeIsAvailable = false;
 
@@ -238,14 +238,13 @@ contract CaleroICO is Ownable {
 
         return "Crowdsale finished!";
     }
-    
-    /** 
+
+    /**
      * @dev selfDistruct
      */
     function killContract() external onlyOwner {
-        require(!finalizeIsAvailable);
-        
+        require(!finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
+
         selfdestruct(owner);
     }
-    
 }
