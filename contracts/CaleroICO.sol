@@ -2,11 +2,12 @@ pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
 import "./Ownable.sol";
+import "./ERC20.sol";
 import './oraclize/EthPriceOraclize.sol';
 import './interfaces/TokenInterface.sol';
 import './deployers/OraclizeDeployer.sol';
 import './deployers/VaultDeployer.sol';
-import './RefundVault.sol';
+import './RefundEscrow.sol';
 
 /**
  * @title Calero project crowdsale smart contract
@@ -30,7 +31,7 @@ contract CaleroICO is Ownable {
 
     TokenInterface public token;
     EthPriceOraclize public oraclize;
-    RefundVault public vault;
+    RefundEscrow public vault;
 
     event TokenPurchase(address purchaser, address beneficiary, uint256 value, uint256 amount);
     event StageStarted(uint256 tokens, uint256 bonus, uint256 startDate, uint256 finishDate);
@@ -58,7 +59,7 @@ contract CaleroICO is Ownable {
      */
     constructor(address _tokenAddress) public {
         token = TokenInterface(_tokenAddress);
-        vault = VaultDeployer.deployVaultContract(msg.sender, token);
+        vault = VaultDeployer.deployVaultContract(msg.sender);
         oraclize = OraclizeDeployer.deployOraclize();
     }
 
@@ -192,9 +193,9 @@ contract CaleroICO is Ownable {
     /**
      * @dev Finish the crowdsale, enable refund or send all money to owner address
      */
-    function finalizeCrowdsale() external {
+    function finalizeCrowdsale() external onlyOwner {
         require(finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
-        require(stage > 3, "finalizeCrowdsale: finalize is not available yet");
+        require(stage == 3, "finalizeCrowdsale: finalize is not available yet");
 
         finalizeIsAvailable = false;
 
@@ -203,7 +204,7 @@ contract CaleroICO is Ownable {
         } else {
             vault.enableRefunds();
         }
-
+        stage = stage.add(1);
         token.burn(token.balanceOf(this));
     }
 
@@ -215,10 +216,6 @@ contract CaleroICO is Ownable {
     }
 
     function transferERC20(address _token, address _contributor, uint256 _amount) external onlyOwner {
-        require(_token != address(0));
-        require(_contributor != address(0));
-        require(_amount >= 0);
-
         ERC20(_token).transfer(_contributor, _amount);
     }
 

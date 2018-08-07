@@ -1,5 +1,8 @@
 pragma solidity ^0.4.24;
 
+/**
+ * @title Multiownable
+ */
 contract Multiownable {
 
     // VARIABLES
@@ -25,7 +28,7 @@ contract Multiownable {
     event OperationCreated(bytes32 operation, uint howMany, uint ownersCount, address proposer);
     event OperationUpvoted(bytes32 operation, uint votes, uint howMany, uint ownersCount, address upvoter);
     event OperationPerformed(bytes32 operation, uint howMany, uint ownersCount, address performer);
-    event OperationDownvoted(bytes32 operation, uint votes, uint ownersCount, address downvoter);
+    event OperationDownvoted(bytes32 operation, uint votes, uint ownersCount,  address downvoter);
     event OperationCancelled(bytes32 operation, address lastCanceller);
 
     // ACCESSORS
@@ -45,8 +48,8 @@ contract Multiownable {
     // MODIFIERS
 
     /**
-     * @dev Allows to perform method by any of the owners
-     */
+    * @dev Allows to perform method by any of the owners
+    */
     modifier onlyAnyOwner {
         if (checkHowManyOwners(1)) {
             bool update = (insideCallSender == address(0));
@@ -63,8 +66,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after many owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after many owners call it with the same arguments
+    */
     modifier onlyManyOwners {
         if (checkHowManyOwners(howManyOwnersDecide)) {
             bool update = (insideCallSender == address(0));
@@ -81,8 +84,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after all owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after all owners call it with the same arguments
+    */
     modifier onlyAllOwners {
         if (checkHowManyOwners(owners.length)) {
             bool update = (insideCallSender == address(0));
@@ -99,8 +102,8 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after some owners call it with the same arguments
-     */
+    * @dev Allows to perform method only after some owners call it with the same arguments
+    */
     modifier onlySomeOwners(uint howMany) {
         require(howMany > 0, "onlySomeOwners: howMany argument is zero");
         require(howMany <= owners.length, "onlySomeOwners: howMany argument exceeds the number of owners");
@@ -164,9 +167,9 @@ contract Multiownable {
     }
 
     /**
-     * @dev Used to delete cancelled or performed operation
-     * @param operation defines which operation to delete
-     */
+    * @dev Used to delete cancelled or performed operation
+    * @param operation defines which operation to delete
+    */
     function deleteOperation(bytes32 operation) internal {
         uint index = allOperationsIndicies[operation];
         if (index < allOperations.length - 1) { // Not last
@@ -183,9 +186,9 @@ contract Multiownable {
     // PUBLIC METHODS
 
     /**
-     * @dev Allows owners to change their mind by cacnelling votesMaskByOperation operations
-     * @param operation defines which operation to delete
-     */
+    * @dev Allows owners to change their mind by cacnelling votesMaskByOperation operations
+    * @param operation defines which operation to delete
+    */
     function cancelPending(bytes32 operation) public onlyAnyOwner {
         uint ownerIndex = ownersIndices[msg.sender] - 1;
         require((votesMaskByOperation[operation] & (2 ** ownerIndex)) != 0, "cancelPending: operation not found for this user");
@@ -200,10 +203,10 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows owners to change ownership
-     * @param newOwners defines array of addresses of new owners
-     * @param newHowManyOwnersDecide defines how many owners can decide
-     */
+    * @dev Allows owners to change ownership
+    * @param newOwners defines array of addresses of new owners
+    * @param newHowManyOwnersDecide defines how many owners can decide
+    */
     function transferOwnershipWithHowMany(address[] newOwners, uint256 newHowManyOwnersDecide) public onlyManyOwners {
         require(newOwners.length > 0, "transferOwnershipWithHowMany: owners array is empty");
         require(newOwners.length <= 256, "transferOwnershipWithHowMany: owners count is greater then 256");

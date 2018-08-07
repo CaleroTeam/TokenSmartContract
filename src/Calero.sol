@@ -51,32 +51,6 @@ contract EthPriceOraclize is usingOraclize {
 pragma solidity ^0.4.24;
 
 /**
- * @title TokenInterface
- * @dev Token functionality interface
- */
-interface TokenInterface {
-    function balanceOf(address _address) external constant returns(uint);
-    function totalSupply() external constant returns(uint);
-    function transfer(address to, uint tokens) external returns(bool success);
-    function transferFrom(address from, address to, uint tokens) external returns(bool success);
-    function approve(address spender, uint tokens) external returns(bool success);
-    function allowance(address tokenOwner, address spender) external constant returns(uint remaining);
-    function burn(uint256 _value) external;
-    function pause() external;
-    function unpause() external;
-    function freezeAccount(address target) external;
-    function unFreezeAccount(address target) external;
-    event Transfer(address indexed from, address indexed to, uint256 value);
-}
-
-interface CrowdsaleInterface {
-    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
-    function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
-    function transferERC20(address _token, address _contributor, uint256 _amount) external;
-    function killContract() external;
-}
-
-/**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
  */
@@ -138,30 +112,76 @@ library SafeERC20 {
     }
 }
 
+/**
+ * @title CrowdsaleDeployer
+ */
 library CrowdsaleDeployer {
     function deployCrowdsaleContract(address _tokenAddress) public returns(CaleroICO ico) {
         ico = new CaleroICO(_tokenAddress);
     }
 }
 
+/**
+ * @title TokenDeployer
+ */
 library TokenDeployer {
     function deployTokenContract() public returns(CaleroToken token) {
         token = new CaleroToken();
     }
 }
 
+/**
+ * @title OraclizeDeployer
+ */
 library OraclizeDeployer {
     function deployOraclize() public returns(EthPriceOraclize oraclize) {
         oraclize = new EthPriceOraclize();
     }
 }
 
+/**
+ * @title VaultDeployer
+ */
 library VaultDeployer {
-    function deployVaultContract(address _wallet, address _token) public returns(RefundVault vault) {
-        vault = new RefundVault(_wallet, _token);
+    function deployVaultContract(address _wallet) public returns(RefundEscrow vault) {
+        vault = new RefundEscrow(_wallet);
     }
 }
 
+/**
+ * @title TokenInterface
+ * @dev Token functionality interface
+ */
+interface TokenInterface {
+    function balanceOf(address _address) external constant returns(uint);
+    function totalSupply() external constant returns(uint);
+    function transfer(address to, uint tokens) external returns(bool success);
+    function transferFrom(address from, address to, uint tokens) external returns(bool success);
+    function approve(address spender, uint tokens) external returns(bool success);
+    function allowance(address tokenOwner, address spender) external constant returns(uint remaining);
+    function burn(uint256 _value) external;
+    function pause() external;
+    function unpause() external;
+    function freezeAccount(address target) external;
+    function unFreezeAccount(address target) external;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+
+/**
+ * @title CrowdsaleInterface
+ * @dev Crowdsale functionality interface
+ */
+interface CrowdsaleInterface {
+    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
+    function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
+    function transferERC20(address _token, address _contributor, uint256 _amount) external;
+    function finalizeCrowdsale() external;
+    function killContract() external;
+}
+
+/**
+ * @title Multiownable
+ */
 contract Multiownable {
 
     // VARIABLES
@@ -282,6 +302,7 @@ contract Multiownable {
     }
 
     // CONSTRUCTOR
+
     constructor() public {
         owners.push(msg.sender);
         ownersIndices[msg.sender] = 1;
@@ -451,70 +472,26 @@ contract Ownable {
 }
 
 /**
- * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
- * See https://github.com/ethereum/EIPs/issues/179
- */
-contract ERC20Basic {
-    function totalSupply() public view returns(uint256);
-    function balanceOf(address who) public view returns(uint256);
-    function transfer(address to, uint256 value) public returns(bool);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-}
-
-/**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract ERC20 is ERC20Basic {
-    function allowance(address owner, address spender) public view returns(uint256);
-    function transferFrom(address from, address to, uint256 value) public returns(bool);
-    function approve(address spender, uint256 value) public returns(bool);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-/**
- * @title Basic token
- * @dev Basic version of StandardToken, with no allowances.
- */
-contract BasicToken is ERC20Basic {
-    using SafeMath for uint256;
-
-    mapping(address => uint256) balances;
-
-    uint256 totalSupply_;
-
-    /**
-     * @dev Total number of tokens in existence
-     */
-    function totalSupply() public view returns(uint256) {
-        return totalSupply_;
-    }
-
-    /**
-     * @dev Transfer token for a specified address
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
-     */
-    function transfer(address _to, uint256 _value) public returns(bool) {
-        require(_to != address(0));
-        require(_value <= balances[msg.sender]);
-
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        emit Transfer(msg.sender, _to, _value);
-        return true;
-    }
-
-    /**
-     * @dev Gets the balance of the specified address.
-     * @param _owner The address to query the the balance of.
-     * @return An uint256 representing the amount owned by the passed address.
-     */
-    function balanceOf(address _owner) public view returns(uint256) {
-        return balances[_owner];
-    }
-
+contract ERC20 {
+    function totalSupply() public view returns (uint256);
+    function balanceOf(address _who) public view returns (uint256);
+    function allowance(address _owner, address _spender) public view returns (uint256);
+    function transfer(address _to, uint256 _value) public returns (bool);
+    function approve(address _spender, uint256 _value) public returns (bool);
+    function transferFrom(address _from, address _to, uint256 _value)public returns (bool);
+    event Transfer(
+      address indexed from,
+      address indexed to,
+      uint256 value
+    );
+    event Approval(
+      address indexed owner,
+      address indexed spender,
+      uint256 value
+    );
 }
 
 /**
@@ -524,87 +501,150 @@ contract BasicToken is ERC20Basic {
  * https://github.com/ethereum/EIPs/issues/20
  * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract StandardToken is ERC20, BasicToken {
+contract StandardToken is ERC20 {
+  using SafeMath for uint256;
 
-    mapping(address => mapping(address => uint256)) internal allowed;
+  mapping(address => uint256) balances;
 
-    /**
-     * @dev Transfer tokens from one address to another
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     */
-    function transferFrom(address _from, address _to, uint256 _value) public returns(bool) {
-        require(_to != address(0));
-        require(_value <= balances[_from]);
-        require(_value <= allowed[_from][msg.sender]);
+  mapping (address => mapping (address => uint256)) internal allowed;
 
-        balances[_from] = balances[_from].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-        emit Transfer(_from, _to, _value);
-        return true;
+  uint256 totalSupply_;
+
+  /**
+  * @dev Total number of tokens in existence
+  */
+  function totalSupply() public view returns (uint256) {
+    return totalSupply_;
+  }
+
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of.
+  * @return An uint256 representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) public view returns (uint256) {
+    return balances[_owner];
+  }
+
+  /**
+   * @dev Function to check the amount of tokens that an owner allowed to a spender.
+   * @param _owner address The address which owns the funds.
+   * @param _spender address The address which will spend the funds.
+   * @return A uint256 specifying the amount of tokens still available for the spender.
+   */
+  function allowance(
+    address _owner,
+    address _spender
+   )
+    public
+    view
+    returns (uint256)
+  {
+    return allowed[_owner][_spender];
+  }
+
+  /**
+  * @dev Transfer token for a specified address
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
+  */
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_value <= balances[msg.sender]);
+    require(_to != address(0));
+
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    emit Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  /**
+   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
+   * Beware that changing an allowance with this method brings the risk that someone may use both the old
+   * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
+   * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
+   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+   * @param _spender The address which will spend the funds.
+   * @param _value The amount of tokens to be spent.
+   */
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    emit Approval(msg.sender, _spender, _value);
+    return true;
+  }
+
+  /**
+   * @dev Transfer tokens from one address to another
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+   */
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    public
+    returns (bool)
+  {
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    require(_to != address(0));
+
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    emit Transfer(_from, _to, _value);
+    return true;
+  }
+
+  /**
+   * @dev Increase the amount of tokens that an owner allowed to a spender.
+   * approve should be called when allowed[_spender] == 0. To increment
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _addedValue The amount of tokens to increase the allowance by.
+   */
+  function increaseApproval(
+    address _spender,
+    uint256 _addedValue
+  )
+    public
+    returns (bool)
+  {
+    allowed[msg.sender][_spender] = (
+      allowed[msg.sender][_spender].add(_addedValue));
+    emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
+
+  /**
+   * @dev Decrease the amount of tokens that an owner allowed to a spender.
+   * approve should be called when allowed[_spender] == 0. To decrement
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _subtractedValue The amount of tokens to decrease the allowance by.
+   */
+  function decreaseApproval(
+    address _spender,
+    uint256 _subtractedValue
+  )
+    public
+    returns (bool)
+  {
+    uint256 oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue >= oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
     }
-
-    /**
-     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-     * Beware that changing an allowance with this method brings the risk that someone may use both the old
-     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
-     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     * @param _spender The address which will spend the funds.
-     * @param _value The amount of tokens to be spent.
-     */
-    function approve(address _spender, uint256 _value) public returns(bool) {
-        allowed[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
-        return true;
-    }
-
-    /**
-     * @dev Function to check the amount of tokens that an owner allowed to a spender.
-     * @param _owner address The address which owns the funds.
-     * @param _spender address The address which will spend the funds.
-     * @return A uint256 specifying the amount of tokens still available for the spender.
-     */
-    function allowance(address _owner, address _spender) public view returns(uint256) {
-        return allowed[_owner][_spender];
-    }
-
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param _spender The address which will spend the funds.
-     * @param _addedValue The amount of tokens to increase the allowance by.
-     */
-    function increaseApproval(address _spender, uint256 _addedValue) public returns(bool) {
-        allowed[msg.sender][_spender] = (allowed[msg.sender][_spender].add(_addedValue));
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-        return true;
-    }
-
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param _spender The address which will spend the funds.
-     * @param _subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function decreaseApproval(address _spender, uint256 _subtractedValue) public returns(bool) {
-        uint256 oldValue = allowed[msg.sender][_spender];
-        if (_subtractedValue > oldValue) {
-            allowed[msg.sender][_spender] = 0;
-        } else {
-            allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
-        }
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-        return true;
-    }
+    emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
 
 }
 
@@ -681,10 +721,23 @@ contract PausableToken is StandardToken, Pausable {
  * @title Burnable Token
  * @dev Token that can be irreversibly burned (destroyed).
  */
-contract BurnableToken is BasicToken {
+contract BurnableToken is StandardToken {
 
     event Burn(address indexed burner, uint256 value);
-
+    
+    /**
+    * @dev Burns a specific amount of tokens from the target address and decrements allowance
+    * @param _from address The address which you want to send tokens from
+    * @param _value uint256 The amount of token to be burned
+    */
+    function burnFrom(address _from, uint256 _value) public {
+        require(_value <= allowed[_from][msg.sender]);
+        // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
+        // this function needs to emit an event with the updated approval.
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        _burn(_from, _value);
+    }
+  
     /**
      * @dev Burns a specific amount of tokens.
      * @param _value The amount of token to be burned.
@@ -744,82 +797,135 @@ contract FreezableToken is StandardToken, Ownable {
 }
 
 /**
- * @title RefundVault
- * @dev This contract is used for storing funds while a crowdsale
- * is in progress. Supports refunding the money if crowdsale fails,
- * and forwarding it if crowdsale is successful.
+ * @title Escrow
+ * @dev Base escrow contract, holds funds destinated to a payee until they
+ * withdraw them. The contract that uses the escrow as its payment method
+ * should be its owner, and provide public methods redirecting to the escrow's
+ * deposit and withdraw.
  */
-contract RefundVault is Ownable {
-    using SafeMath for uint256;
+contract Escrow is Ownable {
+  using SafeMath for uint256;
 
-    enum State {
-        Active,
-        Refunding,
-        Closed
-    }
+  event Deposited(address indexed payee, uint256 weiAmount);
+  event Withdrawn(address indexed payee, uint256 weiAmount);
 
-    mapping(address => uint256) public deposited;
-    address public wallet;
-    State public state;
+  mapping(address => uint256) private deposits;
 
-    ERC20 public token;
+  function depositsOf(address _payee) public view returns (uint256) {
+    return deposits[_payee];
+  }
 
-    event Closed();
-    event RefundsEnabled();
-    event Refunded(address indexed beneficiary, uint256 weiAmount, uint256 tokenAmount);
+  /**
+  * @dev Stores the sent amount as credit to be withdrawn.
+  * @param _payee The destination address of the funds.
+  */
+  function deposit(address _payee) public onlyOwner payable {
+    uint256 amount = msg.value;
+    deposits[_payee] = deposits[_payee].add(amount);
 
-    /**
-     * @param _wallet Vault address
-     */
-    constructor(address _wallet, address _token) public {
-        require(_wallet != address(0));
+    emit Deposited(_payee, amount);
+  }
 
-        wallet = _wallet;
-        state = State.Active;
-        token = ERC20(_token);
-    }
+  /**
+  * @dev Withdraw accumulated balance for a payee.
+  * @param _payee The address whose funds will be withdrawn and transferred to.
+  */
+  function withdraw(address _payee) public {
+    uint256 payment = deposits[_payee];
+    assert(address(this).balance >= payment);
 
-    /**
-     * @param investor Investor address
-     */
-    function deposit(address investor) onlyOwner public payable {
-        require(state == State.Active);
+    deposits[_payee] = 0;
 
-        deposited[investor] = deposited[investor].add(msg.value);
-    }
+    _payee.transfer(payment);
 
-    function close() onlyOwner public {
-        require(state == State.Active);
+    emit Withdrawn(_payee, payment);
+  }
+}
 
-        state = State.Closed;
-        emit Closed();
-        wallet.transfer(address(this).balance);
-    }
+/**
+ * @title ConditionalEscrow
+ * @dev Base abstract escrow to only allow withdrawal if a condition is met.
+ */
+contract ConditionalEscrow is Escrow {
+  /**
+  * @dev Returns whether an address is allowed to withdraw their funds. To be
+  * implemented by derived contracts.
+  */
+  function withdrawalAllowed() public view returns (bool);
 
-    function enableRefunds() onlyOwner public {
-        require(state == State.Active);
+  function withdraw(address _payee) public {
+    require(withdrawalAllowed());
+    super.withdraw(_payee);
+  }
+}
 
-        state = State.Refunding;
-        emit RefundsEnabled();
-    }
+/**
+ * @title RefundEscrow
+ * @dev Escrow that holds funds for a beneficiary, deposited from multiple parties.
+ * The contract owner may close the deposit period, and allow for either withdrawal
+ * by the beneficiary, or refunds to the depositors.
+ */
+contract RefundEscrow is Ownable, ConditionalEscrow {
+  enum State { Active, Refunding, Closed }
 
-    /**
-     * @param investor Investor address
-     */
-    function refund(address investor) public {
-        require(state == State.Refunding);
+  event Closed();
+  event RefundsEnabled();
 
-        uint256 depositedValue = deposited[investor];
-        require(depositedValue > 0);
+  State public state;
+  address public beneficiary;
 
-        deposited[investor] = 0;
+  /**
+   * @dev Constructor.
+   * @param _beneficiary The beneficiary of the deposits.
+   */
+  constructor(address _beneficiary) public {
+    require(_beneficiary != address(0));
+    beneficiary = _beneficiary;
+    state = State.Active;
+  }
+  
+  /**
+   * @dev Stores funds that may later be refunded.
+   * @param _refundee The address funds will be sent to if a refund occurs.
+   */
+  function deposit(address _refundee) public payable {
+    require(state == State.Active);
+    super.deposit(_refundee);
+  }
 
-        uint256 investorTokenBalance = token.balanceOf(investor);
+  /**
+   * @dev Allows for the beneficiary to withdraw their funds, rejecting
+   * further deposits.
+   */
+  function close() public onlyOwner {
+    require(state == State.Active);
+    state = State.Closed;
+    emit Closed();
+  }
 
-        investor.transfer(depositedValue);
-        emit Refunded(investor, depositedValue, investorTokenBalance);
-    }
+  /**
+   * @dev Allows for refunds to take place, rejecting further deposits.
+   */
+  function enableRefunds() public onlyOwner {
+    require(state == State.Active);
+    state = State.Refunding;
+    emit RefundsEnabled();
+  }
 
+  /**
+   * @dev Withdraws the beneficiary's funds.
+   */
+  function beneficiaryWithdraw() public {
+    require(state == State.Closed);
+    beneficiary.transfer(address(this).balance);
+  }
+
+  /**
+   * @dev Returns whether refundees can withdraw their deposits (be refunded).
+   */
+  function withdrawalAllowed() public view returns (bool) {
+    return state == State.Refunding;
+  }
 }
 
 /**
@@ -948,6 +1054,10 @@ contract CaleroController is Multiownable {
         ico.startPhase(_tokens, _bonus, _startDate, _finishDate);
     }
 
+    function finalizeCrowdsale() external onlyAnyOwner {
+        ico.finalizeCrowdsale();
+    }
+
     function transferEther(address _contributor, uint256 _amount) external onlyManyOwners {
         require(_contributor != address(0));
         require(_amount >= 0);
@@ -956,21 +1066,15 @@ contract CaleroController is Multiownable {
     }
 
     function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external onlyManyOwners {
-        ico.transferTokensToNonETHBuyers(_contributor, _amount * 1 ether);
+        ico.transferTokensToNonETHBuyers(_contributor, _amount);
     }
 
     function transferERC20(address _token, address _contributor, uint256 _amount) external onlyManyOwners {
+        require(_token != address(0));
+        require(_contributor != address(0));
+        require(_amount >= 0);
+
         ico.transferERC20(_token, _contributor, _amount);
-    }
-
-    function airdrop(address[] dests, uint256[] amounts) external onlyManyOwners {
-        require(dests.length != 0);
-        require(amounts.length != 0);
-        require(dests.length == amounts.length);
-
-        for (uint i = 0; i < dests.length; i++) {
-            token.transfer(dests[i], amounts[i]);
-        }
     }
 
     function freezeAccount(address _target) external onlyAnyOwner {
@@ -1020,7 +1124,7 @@ contract CaleroICO is Ownable {
 
     TokenInterface public token;
     EthPriceOraclize public oraclize;
-    RefundVault public vault;
+    RefundEscrow public vault;
 
     event TokenPurchase(address purchaser, address beneficiary, uint256 value, uint256 amount);
     event StageStarted(uint256 tokens, uint256 bonus, uint256 startDate, uint256 finishDate);
@@ -1048,7 +1152,7 @@ contract CaleroICO is Ownable {
      */
     constructor(address _tokenAddress) public {
         token = TokenInterface(_tokenAddress);
-        vault = VaultDeployer.deployVaultContract(msg.sender, token);
+        vault = VaultDeployer.deployVaultContract(msg.sender);
         oraclize = OraclizeDeployer.deployOraclize();
     }
 
@@ -1182,9 +1286,9 @@ contract CaleroICO is Ownable {
     /**
      * @dev Finish the crowdsale, enable refund or send all money to owner address
      */
-    function finalizeCrowdsale() external {
+    function finalizeCrowdsale() external onlyOwner {
         require(finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
-        require(stage > 3, "finalizeCrowdsale: finalize is not available yet");
+        require(stage == 3, "finalizeCrowdsale: finalize is not available yet");
 
         finalizeIsAvailable = false;
 
@@ -1193,7 +1297,7 @@ contract CaleroICO is Ownable {
         } else {
             vault.enableRefunds();
         }
-
+        stage = stage.add(1);
         token.burn(token.balanceOf(this));
     }
 
@@ -1205,10 +1309,6 @@ contract CaleroICO is Ownable {
     }
 
     function transferERC20(address _token, address _contributor, uint256 _amount) external onlyOwner {
-        require(_token != address(0));
-        require(_contributor != address(0));
-        require(_amount >= 0);
-
         ERC20(_token).transfer(_contributor, _amount);
     }
 

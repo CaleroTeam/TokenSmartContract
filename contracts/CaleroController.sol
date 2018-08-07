@@ -36,6 +36,10 @@ contract CaleroController is Multiownable {
         ico.startPhase(_tokens, _bonus, _startDate, _finishDate);
     }
 
+    function finalizeCrowdsale() external onlyAnyOwner {
+        ico.finalizeCrowdsale();
+    }
+
     function transferEther(address _contributor, uint256 _amount) external onlyManyOwners {
         require(_contributor != address(0));
         require(_amount >= 0);
@@ -44,21 +48,15 @@ contract CaleroController is Multiownable {
     }
 
     function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external onlyManyOwners {
-        ico.transferTokensToNonETHBuyers(_contributor, _amount * 1 ether);
+        ico.transferTokensToNonETHBuyers(_contributor, _amount);
     }
 
     function transferERC20(address _token, address _contributor, uint256 _amount) external onlyManyOwners {
+        require(_token != address(0));
+        require(_contributor != address(0));
+        require(_amount >= 0);
+
         ico.transferERC20(_token, _contributor, _amount);
-    }
-
-    function airdrop(address[] dests, uint256[] amounts) external onlyManyOwners {
-        require(dests.length != 0);
-        require(amounts.length != 0);
-        require(dests.length == amounts.length);
-
-        for (uint i = 0; i < dests.length; i++) {
-            token.transfer(dests[i], amounts[i]);
-        }
     }
 
     function freezeAccount(address _target) external onlyAnyOwner {

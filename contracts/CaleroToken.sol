@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./Ownable.sol";
+import "./FreezableToken.sol";
 import "./PausableToken.sol";
 import "./BurnableToken.sol";
-import "./FreezableToken.sol";
 import "./TokenTimeLock.sol";
 
 /**
