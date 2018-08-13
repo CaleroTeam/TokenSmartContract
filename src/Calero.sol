@@ -1,4 +1,3 @@
-/*
 pragma solidity ^0.4.18;
 
 import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
@@ -7,10 +6,7 @@ import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
  * @title EthPriceOraclize
  * @dev Using oraclize for getting ETH price from coinmarketcap
  */
-
-/*
 contract EthPriceOraclize is usingOraclize {
-    
     uint256 public delay = 43200; // 12 hours
     uint256 public ETHUSD;
 
@@ -51,16 +47,8 @@ contract EthPriceOraclize is usingOraclize {
         return ETHUSD;
     }
 }
-*/
 
 pragma solidity ^0.4.24;
-
-contract EthPriceOraclize {
-    uint256 public ETHUSD = 54367;
-    function getEthPrice() external view returns(uint256) {
-        return ETHUSD;
-    }
-}
 
 /**
  * @title SafeMath
@@ -164,7 +152,7 @@ library VaultDeployer {
  * @title CrowdsaleInterface
  * @dev Crowdsale functionality interface
  */
-interface CrowdsaleInterface {
+contract CrowdsaleInterface {
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
     function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
     function transferERC20(address _token, address _contributor, uint256 _amount) external;
@@ -491,7 +479,7 @@ contract ERC20 {
  * @title TokenInterface
  * @dev Token functionality interface
  */
-contract CaleroInterface is ERC20 {
+contract CLORInterface is ERC20 {
     function burn(uint256 _value) external;
     function pause() external;
     function unpause() external;
@@ -1028,14 +1016,14 @@ contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
  * @title CaleroController
  */
 contract CaleroController is Multiownable {
-    TokenInterface public token;
+    CLORInterface public token;
     CrowdsaleInterface public ico;
 
     /**
      * @dev Constructor
      */
     constructor() public {
-        token = TokenInterface(TokenDeployer.deployTokenContract());
+        token = CLORInterface(TokenDeployer.deployTokenContract());
     }
 
     function() external payable {
@@ -1102,7 +1090,7 @@ contract CaleroController is Multiownable {
 /**
  * @title Calero project crowdsale smart contract
  */
-contract CaleroICO is Ownable {
+contract CaleroICO is Ownable, CrowdsaleInterface {
     using SafeMath for uint256;
 
     uint256 public pricePerToken = 40; // 1 CLOR - 40 cents or $0.4
@@ -1119,7 +1107,7 @@ contract CaleroICO is Ownable {
     bool public hardCapReached = false;
     bool public finalizeIsAvailable = true;
 
-    TokenInterface public token;
+    CLORInterface public token;
     EthPriceOraclize public oraclize;
     RefundEscrow public vault;
 
@@ -1148,7 +1136,7 @@ contract CaleroICO is Ownable {
      * @dev Constructor
      */
     constructor(address _tokenAddress) public {
-        token = TokenInterface(_tokenAddress);
+        token = CLORInterface(_tokenAddress);
         vault = VaultDeployer.deployVaultContract(msg.sender);
         oraclize = OraclizeDeployer.deployOraclize();
     }
@@ -1269,7 +1257,7 @@ contract CaleroICO is Ownable {
     /**
      * @dev Start crowdsale phase
      */
-    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) public onlyOwner {
+    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external onlyOwner {
         require(_tokens <= token.balanceOf(this), "startPhase: amount of tokens is not enough for start");
         require(_startDate != 0 && _finishDate != 0, "startPhase: finishdate/startdate are not correct");
         require(_bonus < 100, "startPhase: the bonus size should be smaller of 100");
