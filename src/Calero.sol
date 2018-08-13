@@ -1,3 +1,4 @@
+/*
 pragma solidity ^0.4.18;
 
 import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
@@ -6,7 +7,10 @@ import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
  * @title EthPriceOraclize
  * @dev Using oraclize for getting ETH price from coinmarketcap
  */
+
+/*
 contract EthPriceOraclize is usingOraclize {
+    
     uint256 public delay = 43200; // 12 hours
     uint256 public ETHUSD;
 
@@ -47,8 +51,16 @@ contract EthPriceOraclize is usingOraclize {
         return ETHUSD;
     }
 }
+*/
 
 pragma solidity ^0.4.24;
+
+contract EthPriceOraclize {
+    uint256 public ETHUSD = 54367;
+    function getEthPrice() external view returns(uint256) {
+        return ETHUSD;
+    }
+}
 
 /**
  * @title SafeMath
@@ -146,25 +158,6 @@ library VaultDeployer {
     function deployVaultContract(address _wallet) public returns(RefundEscrow vault) {
         vault = new RefundEscrow(_wallet);
     }
-}
-
-/**
- * @title TokenInterface
- * @dev Token functionality interface
- */
-interface TokenInterface {
-    function balanceOf(address _address) external constant returns(uint);
-    function totalSupply() external constant returns(uint);
-    function transfer(address to, uint tokens) external returns(bool success);
-    function transferFrom(address from, address to, uint tokens) external returns(bool success);
-    function approve(address spender, uint tokens) external returns(bool success);
-    function allowance(address tokenOwner, address spender) external constant returns(uint remaining);
-    function burn(uint256 _value) external;
-    function pause() external;
-    function unpause() external;
-    function freezeAccount(address target) external;
-    function unFreezeAccount(address target) external;
-    event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
 /**
@@ -495,6 +488,18 @@ contract ERC20 {
 }
 
 /**
+ * @title TokenInterface
+ * @dev Token functionality interface
+ */
+contract CaleroInterface is ERC20 {
+    function burn(uint256 _value) external;
+    function pause() external;
+    function unpause() external;
+    function freezeAccount(address target) external;
+    function unFreezeAccount(address target) external;
+}
+
+/**
  * @title Standard ERC20 token
  *
  * @dev Implementation of the basic standard token.
@@ -505,9 +510,7 @@ contract StandardToken is ERC20 {
   using SafeMath for uint256;
 
   mapping(address => uint256) balances;
-
   mapping (address => mapping (address => uint256)) internal allowed;
-
   uint256 totalSupply_;
 
   /**
@@ -533,13 +536,10 @@ contract StandardToken is ERC20 {
    * @return A uint256 specifying the amount of tokens still available for the spender.
    */
   function allowance(
-    address _owner,
-    address _spender
-   )
+    address _owner, address _spender)
     public
     view
-    returns (uint256)
-  {
+    returns (uint256) {
     return allowed[_owner][_spender];
   }
 
@@ -1035,8 +1035,7 @@ contract CaleroController is Multiownable {
      * @dev Constructor
      */
     constructor() public {
-        address _token = TokenDeployer.deployTokenContract();
-        token = TokenInterface(_token);
+        token = TokenInterface(TokenDeployer.deployTokenContract());
     }
 
     function() external payable {
@@ -1044,10 +1043,8 @@ contract CaleroController is Multiownable {
     }
 
     function initCrowdsale() external onlyManyOwners {
-        address _ico = CrowdsaleDeployer.deployCrowdsaleContract(address(token));
-        ico = CrowdsaleInterface(_ico);
-
-        token.transfer(_ico, token.balanceOf(this));  // Transfer all crowdsale tokens from controller to crowdsale contract
+        ico = CrowdsaleInterface(CrowdsaleDeployer.deployCrowdsaleContract(address(token)));
+        token.transfer(address(ico), token.balanceOf(this));  // Transfer all crowdsale tokens from controller to crowdsale contract
     }
 
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external onlyManyOwners {
