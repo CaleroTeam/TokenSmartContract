@@ -107,10 +107,13 @@ library SafeMath {
  * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
  */
 library SafeERC20 {
-    function safeTransfer(ERC20 token, address to, uint256 value) internal {
-        require(token.transfer(to, value));
+    function safeTransfer( IERC20 _token, address _to, uint256 _value ) internal {
+        require(_token.transfer(_to, _value));
     }
 }
+
+
+// Deployers
 
 /**
  * @title CrowdsaleDeployer
@@ -148,17 +151,8 @@ library VaultDeployer {
     }
 }
 
-/**
- * @title CrowdsaleInterface
- * @dev Crowdsale functionality interface
- */
-contract CrowdsaleInterface {
-    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
-    function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external;
-    function transferERC20(address _token, address _contributor, uint256 _amount) external;
-    function finalizeCrowdsale() external;
-    function killContract() external;
-}
+
+// Ownerships
 
 /**
  * @title Multiownable
@@ -303,7 +297,7 @@ contract Multiownable {
 
         uint ownerIndex = ownersIndices[msg.sender] - 1;
         require(ownerIndex < owners.length, "checkHowManyOwners: msg.sender is not an owner");
-        bytes32 operation = keccak256(msg.data, ownersGeneration);
+        bytes32 operation = keccak256(abi.encodePacked(msg.data, ownersGeneration));
 
         require((votesMaskByOperation[operation] & (2 ** ownerIndex)) == 0, "checkHowManyOwners: owner already voted for the operation");
         votesMaskByOperation[operation] |= (2 ** ownerIndex);
@@ -346,7 +340,7 @@ contract Multiownable {
     // PUBLIC METHODS
 
     /**
-    * @dev Allows owners to change their mind by cacnelling votesMaskByOperation operations
+    * @dev Allows owners to change their mind by cancelling votesMaskByOperation operations
     * @param operation defines which operation to delete
     */
     function cancelPending(bytes32 operation) public onlyAnyOwner {
@@ -452,54 +446,57 @@ contract Ownable {
     }
 }
 
+
+// Token
+
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract ERC20 {
-    function totalSupply() public view returns (uint256);
-    function balanceOf(address _who) public view returns (uint256);
-    function allowance(address _owner, address _spender) public view returns (uint256);
-    function transfer(address _to, uint256 _value) public returns (bool);
-    function approve(address _spender, uint256 _value) public returns (bool);
-    function transferFrom(address _from, address _to, uint256 _value)public returns (bool);
-    event Transfer(
-      address indexed from,
-      address indexed to,
-      uint256 value
-    );
-    event Approval(
-      address indexed owner,
-      address indexed spender,
-      uint256 value
-    );
-}
+interface IERC20 {
+  function totalSupply() external view returns (uint256);
 
-/**
- * @title TokenInterface
- * @dev Token functionality interface
- */
-contract CLORInterface is ERC20 {
-    function burn(uint256 _value) external;
-    function pause() external;
-    function unpause() external;
-    function freezeAccount(address target) external;
-    function unFreezeAccount(address target) external;
+  function balanceOf(address _who) external view returns (uint256);
+
+  function allowance(address _owner, address _spender)
+    external view returns (uint256);
+
+  function transfer(address _to, uint256 _value) external returns (bool);
+
+  function approve(address _spender, uint256 _value)
+    external returns (bool);
+
+  function transferFrom(address _from, address _to, uint256 _value)
+    external returns (bool);
+
+  event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 value
+  );
+
+  event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+  );
 }
 
 /**
  * @title Standard ERC20 token
  *
  * @dev Implementation of the basic standard token.
- * https://github.com/ethereum/EIPs/issues/20
- * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
+ * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
+ * Originally based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract StandardToken is ERC20 {
+contract ERC20 is IERC20 {
   using SafeMath for uint256;
 
-  mapping(address => uint256) balances;
-  mapping (address => mapping (address => uint256)) internal allowed;
-  uint256 totalSupply_;
+  mapping (address => uint256) private balances_;
+
+  mapping (address => mapping (address => uint256)) private allowed_;
+
+  uint256 private totalSupply_;
 
   /**
   * @dev Total number of tokens in existence
@@ -514,7 +511,7 @@ contract StandardToken is ERC20 {
   * @return An uint256 representing the amount owned by the passed address.
   */
   function balanceOf(address _owner) public view returns (uint256) {
-    return balances[_owner];
+    return balances_[_owner];
   }
 
   /**
@@ -524,11 +521,14 @@ contract StandardToken is ERC20 {
    * @return A uint256 specifying the amount of tokens still available for the spender.
    */
   function allowance(
-    address _owner, address _spender)
+    address _owner,
+    address _spender
+   )
     public
     view
-    returns (uint256) {
-    return allowed[_owner][_spender];
+    returns (uint256)
+  {
+    return allowed_[_owner][_spender];
   }
 
   /**
@@ -537,11 +537,11 @@ contract StandardToken is ERC20 {
   * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(_value <= balances[msg.sender]);
+    require(_value <= balances_[msg.sender]);
     require(_to != address(0));
 
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
+    balances_[msg.sender] = balances_[msg.sender].sub(_value);
+    balances_[_to] = balances_[_to].add(_value);
     emit Transfer(msg.sender, _to, _value);
     return true;
   }
@@ -556,7 +556,7 @@ contract StandardToken is ERC20 {
    * @param _value The amount of tokens to be spent.
    */
   function approve(address _spender, uint256 _value) public returns (bool) {
-    allowed[msg.sender][_spender] = _value;
+    allowed_[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
@@ -575,20 +575,20 @@ contract StandardToken is ERC20 {
     public
     returns (bool)
   {
-    require(_value <= balances[_from]);
-    require(_value <= allowed[_from][msg.sender]);
+    require(_value <= balances_[_from]);
+    require(_value <= allowed_[_from][msg.sender]);
     require(_to != address(0));
 
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances_[_from] = balances_[_from].sub(_value);
+    balances_[_to] = balances_[_to].add(_value);
+    allowed_[_from][msg.sender] = allowed_[_from][msg.sender].sub(_value);
     emit Transfer(_from, _to, _value);
     return true;
   }
 
   /**
    * @dev Increase the amount of tokens that an owner allowed to a spender.
-   * approve should be called when allowed[_spender] == 0. To increment
+   * approve should be called when allowed_[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
@@ -602,15 +602,15 @@ contract StandardToken is ERC20 {
     public
     returns (bool)
   {
-    allowed[msg.sender][_spender] = (
-      allowed[msg.sender][_spender].add(_addedValue));
-    emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    allowed_[msg.sender][_spender] = (
+      allowed_[msg.sender][_spender].add(_addedValue));
+    emit Approval(msg.sender, _spender, allowed_[msg.sender][_spender]);
     return true;
   }
 
   /**
    * @dev Decrease the amount of tokens that an owner allowed to a spender.
-   * approve should be called when allowed[_spender] == 0. To decrement
+   * approve should be called when allowed_[_spender] == 0. To decrement
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
@@ -624,16 +624,96 @@ contract StandardToken is ERC20 {
     public
     returns (bool)
   {
-    uint256 oldValue = allowed[msg.sender][_spender];
+    uint256 oldValue = allowed_[msg.sender][_spender];
     if (_subtractedValue >= oldValue) {
-      allowed[msg.sender][_spender] = 0;
+      allowed_[msg.sender][_spender] = 0;
     } else {
-      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+      allowed_[msg.sender][_spender] = oldValue.sub(_subtractedValue);
     }
-    emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    emit Approval(msg.sender, _spender, allowed_[msg.sender][_spender]);
     return true;
   }
 
+  /**
+   * @dev Internal function that mints an amount of the token and assigns it to
+   * an account. This encapsulates the modification of balances such that the
+   * proper events are emitted.
+   * @param _account The account that will receive the created tokens.
+   * @param _amount The amount that will be created.
+   */
+  function _mint(address _account, uint256 _amount) internal {
+    require(_account != 0);
+    totalSupply_ = totalSupply_.add(_amount);
+    balances_[_account] = balances_[_account].add(_amount);
+    emit Transfer(address(0), _account, _amount);
+  }
+
+  /**
+   * @dev Internal function that burns an amount of the token of a given
+   * account.
+   * @param _account The account whose tokens will be burnt.
+   * @param _amount The amount that will be burnt.
+   */
+  function _burn(address _account, uint256 _amount) internal {
+    require(_account != 0);
+    require(_amount <= balances_[_account]);
+
+    totalSupply_ = totalSupply_.sub(_amount);
+    balances_[_account] = balances_[_account].sub(_amount);
+    emit Transfer(_account, address(0), _amount);
+  }
+
+  /**
+   * @dev Internal function that burns an amount of the token of a given
+   * account, deducting from the sender's allowance for said account. Uses the
+   * internal _burn function.
+   * @param _account The account whose tokens will be burnt.
+   * @param _amount The amount that will be burnt.
+   */
+  function _burnFrom(address _account, uint256 _amount) internal {
+    require(_amount <= allowed_[_account][msg.sender]);
+
+    // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
+    // this function needs to emit an event with the updated approval.
+    allowed_[_account][msg.sender] = allowed_[_account][msg.sender].sub(
+      _amount);
+    _burn(_account, _amount);
+  }
+}
+
+/**
+ * @title Burnable Token
+ * @dev Token that can be irreversibly burned (destroyed).
+ */
+contract ERC20Burnable is ERC20 {
+
+  event TokensBurned(address indexed burner, uint256 value);
+
+  /**
+   * @dev Burns a specific amount of tokens.
+   * @param _value The amount of token to be burned.
+   */
+  function burn(uint256 _value) public {
+    _burn(msg.sender, _value);
+  }
+
+  /**
+   * @dev Burns a specific amount of tokens from the target address and decrements allowance
+   * @param _from address The address which you want to send tokens from
+   * @param _value uint256 The amount of token to be burned
+   */
+  function burnFrom(address _from, uint256 _value) public {
+    _burnFrom(_from, _value);
+  }
+
+  /**
+   * @dev Overrides ERC20._burn in order for burn and burnFrom to emit
+   * an additional Burn event.
+   */
+  function _burn(address _who, uint256 _value) internal {
+    super._burn(_who, _value);
+    emit TokensBurned(_who, _value);
+  }
 }
 
 /**
@@ -641,115 +721,112 @@ contract StandardToken is ERC20 {
  * @dev Base contract which allows children to implement an emergency stop mechanism.
  */
 contract Pausable is Ownable {
-    event Pause();
-    event Unpause();
+  event Paused();
+  event Unpaused();
 
-    bool public paused = false;
+  bool public paused = false;
 
-    /**
-     * @dev Modifier to make a function callable only when the contract is not paused.
-     */
-    modifier whenNotPaused() {
-        require(!paused);
-        _;
-    }
 
-    /**
-     * @dev Modifier to make a function callable only when the contract is paused.
-     */
-    modifier whenPaused() {
-        require(paused);
-        _;
-    }
+  /**
+   * @dev Modifier to make a function callable only when the contract is not paused.
+   */
+  modifier whenNotPaused() {
+    require(!paused);
+    _;
+  }
 
-    /**
-     * @dev called by the owner to pause, triggers stopped state
-     */
-    function pause() onlyOwner whenNotPaused public {
-        paused = true;
-        emit Pause();
-    }
+  /**
+   * @dev Modifier to make a function callable only when the contract is paused.
+   */
+  modifier whenPaused() {
+    require(paused);
+    _;
+  }
 
-    /**
-     * @dev called by the owner to unpause, returns to normal state
-     */
-    function unpause() onlyOwner whenPaused public {
-        paused = false;
-        emit Unpause();
-    }
+  /**
+   * @dev called by the owner to pause, triggers stopped state
+   */
+  function pause() public onlyOwner whenNotPaused {
+    paused = true;
+    emit Paused();
+  }
+
+  /**
+   * @dev called by the owner to unpause, returns to normal state
+   */
+  function unpause() public onlyOwner whenPaused {
+    paused = false;
+    emit Unpaused();
+  }
 }
 
 /**
  * @title Pausable token
- * @dev StandardToken modified with pausable transfers.
+ * @dev ERC20 modified with pausable transfers.
  **/
-contract PausableToken is StandardToken, Pausable {
-    function transfer(address _to, uint256 _value) public whenNotPaused returns(bool) {
-        return super.transfer(_to, _value);
-    }
+contract ERC20Pausable is ERC20, Pausable {
 
-    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns(bool) {
-        return super.transferFrom(_from, _to, _value);
-    }
+  function transfer(
+    address _to,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transfer(_to, _value);
+  }
 
-    function approve( address _spender, uint256 _value) public whenNotPaused returns(bool) {
-        return super.approve(_spender, _value);
-    }
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transferFrom(_from, _to, _value);
+  }
 
-    function increaseApproval( address _spender, uint _addedValue) public whenNotPaused returns(bool success) {
-        return super.increaseApproval(_spender, _addedValue);
-    }
+  function approve(
+    address _spender,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.approve(_spender, _value);
+  }
 
-    function decreaseApproval(address _spender, uint _subtractedValue) public whenNotPaused returns(bool success) {
-        return super.decreaseApproval(_spender, _subtractedValue);
-    }
-}
+  function increaseApproval(
+    address _spender,
+    uint _addedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.increaseApproval(_spender, _addedValue);
+  }
 
-/**
- * @title Burnable Token
- * @dev Token that can be irreversibly burned (destroyed).
- */
-contract BurnableToken is StandardToken {
-
-    event Burn(address indexed burner, uint256 value);
-    
-    /**
-    * @dev Burns a specific amount of tokens from the target address and decrements allowance
-    * @param _from address The address which you want to send tokens from
-    * @param _value uint256 The amount of token to be burned
-    */
-    function burnFrom(address _from, uint256 _value) public {
-        require(_value <= allowed[_from][msg.sender]);
-        // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
-        // this function needs to emit an event with the updated approval.
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-        _burn(_from, _value);
-    }
-  
-    /**
-     * @dev Burns a specific amount of tokens.
-     * @param _value The amount of token to be burned.
-     */
-    function burn(uint256 _value) public {
-        _burn(msg.sender, _value);
-    }
-
-    function _burn(address _who, uint256 _value) internal {
-        require(_value <= balances[_who]);
-        // no need to require value <= totalSupply, since that would imply the
-        // sender's balance is greater than the totalSupply, which *should* be an assertion failure
-
-        balances[_who] = balances[_who].sub(_value);
-        totalSupply_ = totalSupply_.sub(_value);
-        emit Burn(_who, _value);
-        emit Transfer(_who, address(0), _value);
-    }
+  function decreaseApproval(
+    address _spender,
+    uint _subtractedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.decreaseApproval(_spender, _subtractedValue);
+  }
 }
 
 /**
  * @title FreezableToken
  */
-contract FreezableToken is StandardToken, Ownable {
+contract ERC20Freezable is ERC20, Ownable {
     mapping(address => bool) public frozenAccounts;
     event FrozenFunds(address target, bool frozen);
 
@@ -783,6 +860,117 @@ contract FreezableToken is StandardToken, Ownable {
         return super.transferFrom(_from, _to, _value);
     }
 }
+
+/**
+ * @title TokenTimelock
+ * @dev TokenTimelock is a token holder contract that will allow a
+ * beneficiary to extract the tokens after a given release time
+ */
+contract TokenTimelock {
+  using SafeERC20 for IERC20;
+
+  // ERC20 basic token contract being held
+  IERC20 private token_;
+
+  // beneficiary of tokens after they are released
+  address private beneficiary_;
+
+  // timestamp when token release is enabled
+  uint256 private releaseTime_;
+
+  constructor(
+    IERC20 _token,
+    address _beneficiary,
+    uint256 _releaseTime
+  )
+    public
+  {
+    // solium-disable-next-line security/no-block-members
+    require(_releaseTime > block.timestamp);
+    token_ = _token;
+    beneficiary_ = _beneficiary;
+    releaseTime_ = _releaseTime;
+  }
+
+  /**
+   * @return the token being held.
+   */
+  function token() public view returns(IERC20) {
+    return token_;
+  }
+
+  /**
+   * @return the beneficiary of the tokens.
+   */
+  function beneficiary() public view returns(address) {
+    return beneficiary_;
+  }
+
+  /**
+   * @return the time when the tokens are released.
+   */
+  function releaseTime() public view returns(uint256) {
+    return releaseTime_;
+  }
+
+  /**
+   * @notice Transfers tokens held by timelock to beneficiary.
+   */
+  function release() public {
+    // solium-disable-next-line security/no-block-members
+    require(block.timestamp >= releaseTime_);
+
+    uint256 amount = token_.balanceOf(address(this));
+    require(amount > 0);
+
+    token_.safeTransfer(beneficiary_, amount);
+  }
+}
+
+/**
+ * @title CaleroToken
+ */
+contract CaleroToken is ERC20Freezable, ERC20Pausable, ERC20Burnable {
+    string public constant name = "\"Calero\" Project utility token";
+    string public constant symbol = "CLER";
+    uint8 public constant decimals = 18;
+
+    /**
+    * @dev Constructor
+    */
+    constructor() public {
+        _mint(msg.sender, 150000000 * 1 ether); // 150mln tokens totally
+    }
+}
+
+
+// Interfaces
+
+/**
+ * @title CrowdsaleInterface
+ * @dev Crowdsale functionality interface
+ */
+contract CrowdsaleInterface {
+    function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external;
+    function transferTokensToNonETHBuyers(address _beneficiary, uint256 _tokens, uint256 _usdReceived) external;
+    function transferERC20(address _token, address _beneficiary, uint256 _amount) external;
+    function finalizeCrowdsale() external;
+}
+
+/**
+ * @title TokenInterface
+ * @dev Token functionality interface
+ */
+contract CLERInterface is IERC20 {
+    function burn(uint256 _value) external;
+    function pause() external;
+    function unpause() external;
+    function freezeAccount(address target) external;
+    function unFreezeAccount(address target) external;
+}
+
+
+// Funds
 
 /**
  * @title Escrow
@@ -871,7 +1059,7 @@ contract RefundEscrow is Ownable, ConditionalEscrow {
     beneficiary = _beneficiary;
     state = State.Active;
   }
-  
+
   /**
    * @dev Stores funds that may later be refunded.
    * @param _refundee The address funds will be sent to if a refund occurs.
@@ -916,150 +1104,84 @@ contract RefundEscrow is Ownable, ConditionalEscrow {
   }
 }
 
-/**
- * @title TokenTimelock
- * @dev TokenTimelock is a token holder contract that will allow a
- * beneficiary to extract the tokens after a given release time
- */
-contract TokenTimelock {
-    using SafeERC20 for ERC20;
 
-    // CLOR token contract being held
-    ERC20 token;
-
-    // beneficiary of tokens after they are released
-    address public beneficiary;
-
-    // timestamp when token release is enabled
-    uint256 public releaseTime;
-
-    constructor(ERC20 _token, address _beneficiary, uint256 _releaseTime) public {
-        require(_releaseTime > now);
-
-        token = _token;
-        beneficiary = _beneficiary;
-        releaseTime = _releaseTime;
-    }
-
-    /**
-     * @notice Transfers tokens held by timelock to beneficiary.
-     */
-    function release() public {
-        require(now >= releaseTime);
-
-        uint256 amount = token.balanceOf(this);
-        require(amount > 0);
-
-        token.safeTransfer(beneficiary, amount);
-    }
-}
-
-/**
- * @title CaleroToken
- */
-contract CaleroToken is FreezableToken, PausableToken, BurnableToken {
-    string public constant name = "\"Calero\" Project utility token";
-    string public constant symbol = "CLOR";
-    uint8 public constant decimals = 18;
-
-    uint256 public constant INITIAL_SUPPLY = 150000000 * 1 ether; // 150 million total supply
-
-    // ETH wallet addresses
-    address public teamWalletAddress = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C;               // 11% for team - lock up
-    address public contributorsWalletAddress = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C;       // 10% for contributors - lock up
-    address public reserveWalletAddress = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C;            // 20% for reserve
-
-    // Locked tokens contract addresses
-    address public lockedTeamTokensAddress;
-    address public lockedContributorsTokensAddress;
-
-    event TokenTimeLockEnabled(address _contractAddress, uint256 _tokensAmaunt, uint256 _releaseTime, address _beneficiary);
-
-    /**
-    * @dev Constructor
-    */
-    constructor() public {
-        totalSupply_ = INITIAL_SUPPLY;
-
-        // Calculate amaunt for each wallets
-        uint256 teamTokensAmaunt = (totalSupply_.mul(11)).div(100); // 11% from total supply
-        uint256 contributorsTokensAmaunt = (totalSupply_.mul(10)).div(100); // 10% from total supply
-        uint256 reserveTokensAmaunt = (totalSupply_.mul(20)).div(100); // 20% from total supply
-        uint256 crowdsaleTokensAmaunt = (totalSupply_.mul(59)).div(100); // 59% from total supply
-
-        uint256 teamTokensLockTime = uint256(block.timestamp) + 365 days; // Lock for 1 year
-        uint256 contributorsTokensLockTime = uint256(block.timestamp) + 60 days; // Lock for 60 days
-
-        // Create timelock contract for team and contributors tokens
-        TokenTimelock lockedTeamTokens = new TokenTimelock(this, teamWalletAddress, teamTokensLockTime);
-        TokenTimelock lockedContributorsTokens = new TokenTimelock(this, contributorsWalletAddress, contributorsTokensLockTime);
-
-        // Save addresses of timelock contracts
-        lockedTeamTokensAddress = address(lockedTeamTokens);
-        lockedContributorsTokensAddress = address(lockedContributorsTokens);
-
-        // Distributing tokens
-        balances[lockedTeamTokensAddress] = balances[lockedTeamTokensAddress].add(teamTokensAmaunt);
-        balances[lockedContributorsTokensAddress] = balances[lockedContributorsTokensAddress].add(contributorsTokensAmaunt);
-        balances[reserveWalletAddress] = balances[reserveWalletAddress].add(reserveTokensAmaunt);
-        balances[msg.sender] = balances[msg.sender].add(crowdsaleTokensAmaunt);
-
-        // Events
-        emit TokenTimeLockEnabled(lockedTeamTokensAddress, teamTokensAmaunt, teamTokensLockTime, teamWalletAddress);
-        emit TokenTimeLockEnabled(lockedContributorsTokensAddress, contributorsTokensAmaunt, contributorsTokensLockTime, contributorsWalletAddress);
-        emit Transfer(address(0), reserveWalletAddress, reserveTokensAmaunt);
-        emit Transfer(address(0), msg.sender, crowdsaleTokensAmaunt);
-    }
-}
+// Crowdsale
 
 /**
  * @title CaleroController
  */
 contract CaleroController is Multiownable {
-    CLORInterface public token;
-    CrowdsaleInterface public ico;
+    using SafeERC20 for CLERInterface;
+
+    CLERInterface public token;
+    CrowdsaleInterface public crowdsale;
+
+    event EthReceived(uint256 weiAmount);
+    event LockedTokenAddresses(address teamTokensAddress, address contributorsTokensAddress);
 
     /**
      * @dev Constructor
      */
     constructor() public {
-        token = CLORInterface(TokenDeployer.deployTokenContract());
+        token = CLERInterface(TokenDeployer.deployTokenContract());
     }
 
     function() external payable {
-        // ETH claimed
+        emit EthReceived(msg.value);
     }
 
     function initCrowdsale() external onlyManyOwners {
-        ico = CrowdsaleInterface(CrowdsaleDeployer.deployCrowdsaleContract(address(token)));
-        token.transfer(address(ico), token.balanceOf(this));  // Transfer all crowdsale tokens from controller to crowdsale contract
+        crowdsale = CrowdsaleInterface(CrowdsaleDeployer.deployCrowdsaleContract(address(token)));
+
+        uint256 tokensForCrowdsale = 60000000 * 1 ether;        // 40% or 60mln
+        token.safeTransfer(address(crowdsale), tokensForCrowdsale);   // Transfer the crowdsale tokens to crowdsale contract
     }
 
     function startPhase(uint256 _tokens, uint256 _bonus, uint256 _startDate, uint256 _finishDate) external onlyManyOwners {
-        ico.startPhase(_tokens, _bonus, _startDate, _finishDate);
+        crowdsale.startPhase(_tokens, _bonus, _startDate, _finishDate);
     }
 
-    function finalizeCrowdsale() external onlyAnyOwner {
-        ico.finalizeCrowdsale();
+    function finalizeCrowdsale(address _companyReserveTokensWallet, address _teamTokensWallet, address _contributorsTokensWallet) external onlyManyOwners {
+        crowdsale.finalizeCrowdsale();
+        _distributeStayedTokens(_companyReserveTokensWallet, _teamTokensWallet, _contributorsTokensWallet);
     }
 
-    function transferEther(address _contributor, uint256 _amount) external onlyManyOwners {
-        require(_contributor != address(0));
+    function _distributeStayedTokens(address _teamTokensWallet, address _contributorsTokensWallet, address _companyReserveTokensWallet) internal {
+        uint256 teamTokensAmaunt = 30000000 * 1 ether;             // 30mln / 20% of total supply
+        uint256 contributorsTokensAmaunt =  30000000 * 1 ether;    // 30mln / 20% of total supply
+        uint256 companyReserveTokens =  30000000 * 1 ether;        // 30mln / 20% of total supply
+
+        // Create timelock contract for team and contributors tokens
+        address lockedTeamTokens = new TokenTimelock(IERC20(token), _teamTokensWallet, block.timestamp + 365 days);
+        address lockedContributorsTokens = new TokenTimelock(IERC20(token), _contributorsTokensWallet, block.timestamp + 60 days);
+
+        token.safeTransfer(lockedTeamTokens, teamTokensAmaunt);
+        token.safeTransfer(lockedContributorsTokens, contributorsTokensAmaunt);
+        token.safeTransfer(_companyReserveTokensWallet, companyReserveTokens);
+    }
+
+    // Token / ETH transfers
+
+    function transferEther(address _beneficiary, uint256 _amount) external onlyManyOwners {
+        require(_beneficiary != address(0));
         require(_amount >= 0);
 
-        _contributor.transfer(_amount);
+        _beneficiary.transfer(_amount);
     }
 
-    function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external onlyManyOwners {
-        ico.transferTokensToNonETHBuyers(_contributor, _amount);
+    function transferTokensToNonETHBuyers(address _beneficiary, uint256 _tokens, uint256 _usdReceived) external onlyManyOwners {
+        crowdsale.transferTokensToNonETHBuyers(_beneficiary, _tokens, _usdReceived);
     }
 
-    function transferERC20(address _token, address _contributor, uint256 _amount) external onlyManyOwners {
+
+    // Token features
+
+    function transferERC20(address _token, address _beneficiary, uint256 _amount) external onlyManyOwners {
         require(_token != address(0));
-        require(_contributor != address(0));
+        require(_beneficiary != address(0));
         require(_amount >= 0);
 
-        ico.transferERC20(_token, _contributor, _amount);
+        crowdsale.transferERC20(_token, _beneficiary, _amount);
     }
 
     function freezeAccount(address _target) external onlyAnyOwner {
@@ -1081,9 +1203,46 @@ contract CaleroController is Multiownable {
     function resume() external onlyAnyOwner {
         token.unpause();
     }
+}
 
-    function killICOContract() external onlyManyOwners {
-        ico.killContract();
+/**
+ * @title Bonus lock contract, where will funds bonus of investors
+ */
+contract BonusLock is Ownable {
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+
+    // ERC20 basic token contract being held
+    IERC20 private token;
+
+    struct Investor {
+        uint256 bonusTokens;
+        uint256 releaseDate;
+    }
+
+    mapping(address => Investor) public investors;
+
+    event BonusTokensReleased(address beneficiary, uint256 tokensAmaunt);
+
+    constructor(IERC20 _token) public {
+        token = _token;
+    }
+
+    function addBonus(address _beneficiary, uint256 _bonusTokens) public onlyOwner {
+        investors[_beneficiary] = Investor(_bonusTokens, block.timestamp.add(90 days));
+    }
+
+    function releaseTokens(address _beneficiary) public {
+        require(msg.sender == _beneficiary);
+        require(block.timestamp >= investors[_beneficiary].releaseDate, "You can not release your bonus tokens now");
+
+        uint256 amount = investors[_beneficiary].bonusTokens;
+        require(amount > 0);
+
+        investors[_beneficiary].bonusTokens = 0;
+        token.safeTransfer(_beneficiary, amount);
+
+        emit BonusTokensReleased(_beneficiary, amount);
     }
 }
 
@@ -1093,12 +1252,13 @@ contract CaleroController is Multiownable {
 contract CaleroICO is Ownable, CrowdsaleInterface {
     using SafeMath for uint256;
 
-    uint256 public pricePerToken = 40; // 1 CLOR - 40 cents or $0.4
+    uint256 public pricePerToken = 40; // 1 CLER - 40 cents or $0.4
     uint256 public weiRaised;
     uint256 public usdRaised;
     uint256 public tokensSold;
 
-    uint256 public softCap = 5000000; // sofcap is $5 mln
+    uint256 public softCap = 500000;    // softcap is $500k
+    uint256 public hardCap = 10000000;  // hardcap is $10mln
 
     uint256 public stage = 0;
     uint256 public minContributionAmount = 10 ** 17; // 0.1 ETH
@@ -1107,7 +1267,7 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
     bool public hardCapReached = false;
     bool public finalizeIsAvailable = true;
 
-    CLORInterface public token;
+    CLERInterface public token;
     EthPriceOraclize public oraclize;
     RefundEscrow public vault;
 
@@ -1115,6 +1275,7 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
     event StageStarted(uint256 tokens, uint256 bonus, uint256 startDate, uint256 finishDate);
     event StageFinished(uint256 time);
     event SoftCapReached(uint256 time);
+    event HardCapReached(uint256 time);
 
     struct Ico {
         uint256 tokens;
@@ -1124,6 +1285,7 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
         bool finished;
     }
     Ico public ICO;
+    BonusLock public bonusContract;
 
     modifier duringSale {
         require(now < ICO.finishDate);
@@ -1136,9 +1298,10 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
      * @dev Constructor
      */
     constructor(address _tokenAddress) public {
-        token = CLORInterface(_tokenAddress);
+        token = CLERInterface(_tokenAddress);
         vault = VaultDeployer.deployVaultContract(msg.sender);
         oraclize = OraclizeDeployer.deployOraclize();
+        bonusContract = new BonusLock(IERC20(token));
     }
 
     /**
@@ -1158,9 +1321,12 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
         uint256 usdAmount = _getUSDETHPrice(msg.value);
         uint256 tokens = _getTokenAmount(usdAmount);
 
+        require(ICO.tokens >= tokens);
+
         if(ICO.bonus != 0) {
             uint256 bonus = _getBonus(tokens);
-            tokens = tokens.add(bonus);
+            require(ICO.tokens >= tokens.add(bonus));
+            bonusContract.addBonus(_beneficiary, bonus);
         }
 
         usdAmount = usdAmount.div(100); // Removing cents after whole calculation
@@ -1251,6 +1417,10 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
             softCapReached = true;
 
             emit SoftCapReached(now);
+        } else if(usdRaised == hardCap) {
+            hardCapReached = true;
+
+            emit HardCapReached(now);
         }
     }
 
@@ -1286,15 +1456,19 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
         token.burn(token.balanceOf(this));
     }
 
-    function transferTokensToNonETHBuyers(address _contributor, uint256 _amount) external onlyOwner {
-        require(_contributor != address(0));
-        require(_amount >= 0);
+    function transferTokensToNonETHBuyers(address _beneficiary, uint256 _tokens, uint256 _usdReceived) external onlyOwner {
+        require(_beneficiary != address(0));
+        require(_tokens > 0);
+        require(_usdReceived > 0);
 
-        token.transfer(_contributor, _amount);
+        _deliverTokens(_beneficiary, _tokens);
+        _updatePurchasingState(_tokens, 0, _usdReceived);
+
+        _postValidatePurchase();
     }
 
-    function transferERC20(address _token, address _contributor, uint256 _amount) external onlyOwner {
-        ERC20(_token).transfer(_contributor, _amount);
+    function transferERC20(address _token, address _beneficiary, uint256 _amount) external onlyOwner {
+        IERC20(_token).transfer(_beneficiary, _amount);
     }
 
     /**
@@ -1312,14 +1486,5 @@ contract CaleroICO is Ownable, CrowdsaleInterface {
         }
 
         return "Crowdsale finished!";
-    }
-
-    /**
-     * @dev selfDistruct
-     */
-    function killContract() external onlyOwner {
-        require(!finalizeIsAvailable, "finalizeCrowdsale: finalize is not available yet");
-
-        selfdestruct(owner);
     }
 }
